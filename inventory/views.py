@@ -15,6 +15,7 @@ from .services import (
     reconcile_stock,
     resolve_effective_zone,
 )
+from .status import low_stock_items
 
 
 def healthz(request: HttpRequest) -> HttpResponse:
@@ -54,10 +55,17 @@ def home(request: HttpRequest) -> HttpResponse:
             .select_related("fixture", "fixture__room")[:20]
         )
 
+    low_stock_count = low_stock_items().count()
     return render(
         request,
         "inventory/home.html",
-        {"query": query, "items": items, "units": units, "zones": zones},
+        {
+            "query": query,
+            "items": items,
+            "units": units,
+            "zones": zones,
+            "low_stock_count": low_stock_count,
+        },
     )
 
 
