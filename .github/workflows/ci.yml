@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "codex/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SECRET_KEY: ci-only-secret-key-not-for-production
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      LAB_INVENTORY_DB: ${{ github.workspace }}/var/data/ci.sqlite3
+      LAB_INVENTORY_BACKUP_DIR: ${{ github.workspace }}/var/backups
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare runtime directories
+        run: mkdir -p var/data var/backups
+
+      - name: Run migrations and configure SQLite
+        run: |
+          python manage.py migrate --noinput
+          python manage.py configure_sqlite
+
+      - name: Run Django checks and tests
+        run: |
+          python manage.py check
+          python manage.py test
+
+      - name: Exercise backup and verification
+        run: |
+          python manage.py backup_db --output var/backups/ci.sqlite3
+          python manage.py verify_db var/backups/ci.sqlite3
+
+      - name: Build container image
+        run: docker build -t lab-inventory:ci .
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          mkdir -p var/data var/backups
+
+      - name: Start workstation stack
+        run: docker compose up -d --build --wait
+
+      - name: Check health endpoint
+        run: curl --fail --silent --show-error http://127.0.0.1:8000/healthz/
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down
