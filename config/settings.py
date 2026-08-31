@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -17,6 +19,12 @@ def env_list(name: str, default: str = "") -> list[str]:
 
 DEBUG = env_bool("DJANGO_DEBUG", default=True)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "development-only-not-for-production")
+if not DEBUG and SECRET_KEY in {
+    "development-only-not-for-production",
+    "replace-with-a-long-random-secret",
+}:
+    raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY before running with DJANGO_DEBUG=0.")
+
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
