@@ -62,13 +62,14 @@ jobs:
 
       - name: Prepare production-like environment
         run: |
-          mkdir -p var/data var/backups
+          mkdir -p var/data var/backups var/offsite
           cp .env.production.example .env
           sed -i 's#^DJANGO_SECRET_KEY=.*#DJANGO_SECRET_KEY=ci-compose-only-secret-key-not-for-production#' .env
           sed -i 's#^DJANGO_ALLOWED_HOSTS=.*#DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1#' .env
           sed -i 's#^DJANGO_CSRF_TRUSTED_ORIGINS=.*#DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost#' .env
           sed -i "s#^LAB_INVENTORY_HOST_DATA_DIR=.*#LAB_INVENTORY_HOST_DATA_DIR=${GITHUB_WORKSPACE}/var/data#" .env
           sed -i "s#^LAB_INVENTORY_HOST_BACKUP_DIR=.*#LAB_INVENTORY_HOST_BACKUP_DIR=${GITHUB_WORKSPACE}/var/backups#" .env
+          sed -i "s#^LAB_INVENTORY_OFFSITE_BACKUP_DIR=.*#LAB_INVENTORY_OFFSITE_BACKUP_DIR=${GITHUB_WORKSPACE}/var/offsite#" .env
 
       - name: Run deployment preflight
         run: sh scripts/preflight.sh
@@ -78,6 +79,11 @@ jobs:
 
       - name: Check health endpoint
         run: curl --fail --silent --show-error http://127.0.0.1:8000/healthz/
+
+      - name: Exercise verified off-workstation mirror
+        run: |
+          sh scripts/backup-mirror.sh
+          test -n "$(find var/offsite -maxdepth 1 -type f -name 'lab-inventory-*.sqlite3' -print -quit)"
 
       - name: Show logs on failure
         if: failure()
