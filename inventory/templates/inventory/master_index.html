@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Master data | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › Master</nav>
+<section class="hero compact">
+  <p class="eyebrow">Maintainer workflow</p>
+  <h1>物品マスタ</h1>
+  <p>品目定義と、個体として追跡する箱・工具・機器を管理します。通常の在庫数量や保管位置はここでは直接変更しません。</p>
+  <div class="actions">
+    <a class="button-link" href="{% url 'inventory:item-create' %}">品目を追加</a>
+    <a class="button-link" href="{% url 'inventory:unit-create' %}">箱・工具・機器を追加</a>
+  </div>
+</section>
+
+<form class="search-form" method="get">
+  <label for="master-search">マスタを絞り込む</label>
+  <div class="search-row">
+    <input id="master-search" name="q" value="{{ query }}" placeholder="I-0001, C-0042, 品名, 型番…">
+    <button type="submit">検索</button>
+  </div>
+</form>
+
+<section class="panel">
+  <div class="section-heading">
+    <h2>Catalog Item</h2>
+    <a href="{% url 'inventory:item-create' %}">追加</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>品名</th><th>管理</th><th>カテゴリ/型番</th><th>状態</th><th>操作</th></tr></thead>
+      <tbody>
+      {% for item in items %}
+        <tr{% if not item.is_active %} class="inactive"{% endif %}>
+          <td><a href="{% url 'inventory:item-detail' item.code %}">{{ item.code }}</a></td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.get_tracking_mode_display }}{% if item.unit %} / {{ item.unit }}{% endif %}</td>
+          <td>{{ item.category }}{% if item.part_number %} / {{ item.part_number }}{% endif %}</td>
+          <td>{% if item.is_active %}使用中{% else %}inactive{% endif %}</td>
+          <td><a href="{% url 'inventory:item-edit' item.code %}">編集</a></td>
+        </tr>
+      {% empty %}<tr><td colspan="6">該当する品目はありません。</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <h2>Physical Unit</h2>
+    <a href="{% url 'inventory:unit-create' %}">追加</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>名称</th><th>種別</th><th>品目</th><th>状態</th><th>操作</th></tr></thead>
+      <tbody>
+      {% for unit in units %}
+        <tr{% if not unit.is_active %} class="inactive"{% endif %}>
+          <td><a href="{% url 'inventory:unit-detail' unit.code %}">{{ unit.code }}</a></td>
+          <td>{{ unit.name }}</td>
+          <td>{{ unit.get_kind_display }}</td>
+          <td>{% if unit.catalog_item %}<a href="{% url 'inventory:item-detail' unit.catalog_item.code %}">{{ unit.catalog_item.code }}</a>{% else %}—{% endif %}</td>
+          <td>{% if unit.is_active %}使用中{% else %}inactive{% endif %}</td>
+          <td><a href="{% url 'inventory:unit-edit' unit.code %}">編集</a></td>
+        </tr>
+      {% empty %}<tr><td colspan="6">該当するPhysical Unitはありません。</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
