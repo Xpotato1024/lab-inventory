@@ -9,6 +9,7 @@ mkdir -p "$(dirname "${LAB_INVENTORY_DB:-/data/db.sqlite3}")" "${LAB_INVENTORY_B
 
 python manage.py migrate --noinput
 python manage.py configure_sqlite
+python manage.py bootstrap_roles
 python manage.py collectstatic --noinput
 python manage.py check --deploy --fail-level ERROR
 
