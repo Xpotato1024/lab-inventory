@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ zone.code }} | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › 保管場所</nav>
+<section class="hero compact">
+  <p class="eyebrow">{{ zone.code }}</p>
+  <h1>{{ zone.name }}</h1>
+  <p>{{ zone.fixture.room.name }} › {{ zone.fixture.name }}{% if zone.level_order %} › 下から{{ zone.level_order }}段目{% endif %}</p>
+</section>
+
+<section class="panel">
+  <h2>ここに直接置かれている物</h2>
+  <div class="placement-row">
+    {% for placement in placements %}
+      <a class="placement-card" href="{% url 'inventory:unit-detail' placement.unit.code %}">
+        <span class="position-label">左から{{ forloop.counter }}</span>
+        <strong>{{ placement.unit.code }}</strong>
+        <span>{{ placement.unit.name }}</span>
+      </a>
+    {% empty %}
+      <p>登録なし</p>
+    {% endfor %}
+  </div>
+  <p class="help">「左から何番目」は固定スロットではなく、現在の並び順から自動表示しています。</p>
+</section>
+
+<section class="panel">
+  <h2>場所情報</h2>
+  <dl class="detail-list">
+    <dt>種別</dt><dd>{{ zone.get_kind_display }}</dd>
+    <dt>設備</dt><dd>{{ zone.fixture.code }} — {{ zone.fixture.name }}</dd>
+    {% if zone.width_mm %}<dt>幅</dt><dd>{{ zone.width_mm }} mm</dd>{% endif %}
+    {% if zone.depth_mm %}<dt>奥行</dt><dd>{{ zone.depth_mm }} mm</dd>{% endif %}
+    {% if zone.height_mm %}<dt>高さ</dt><dd>{{ zone.height_mm }} mm</dd>{% endif %}
+  </dl>
+</section>
+{% endblock %}
