@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Layout | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › Layout</nav>
+<section class="hero compact">
+  <p class="eyebrow">Maintainer workflow</p>
+  <h1>研究室レイアウト</h1>
+  <p>部屋、ラック・机・壁面などの設備、その中のPlacement Zoneを管理します。既存IDは物理ラベルとの対応維持のため通常変更しません。</p>
+  <p><a class="button-link" href="{% url 'inventory:room-create' %}">部屋を追加</a></p>
+</section>
+
+{% for room in rooms %}
+<section class="panel layout-room{% if not room.is_active %} inactive{% endif %}">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ room.code }}{% if not room.is_active %} / inactive{% endif %}</p>
+      <h2>{{ room.name }}</h2>
+    </div>
+    <div class="actions">
+      <a href="{% url 'inventory:room-3d' %}?room={{ room.code|urlencode }}">3D</a>
+      <a href="{% url 'inventory:room-edit' room.code %}">編集</a>
+      <a class="button-link" href="{% url 'inventory:fixture-create' %}?room={{ room.code|urlencode }}">設備を追加</a>
+    </div>
+  </div>
+
+  {% for fixture in room.fixtures.all %}
+  <article class="layout-fixture{% if not fixture.is_active %} inactive{% endif %}">
+    <div class="section-heading">
+      <div>
+        <strong>{{ fixture.code }} — {{ fixture.name }}</strong>
+        <span class="help">{{ fixture.get_kind_display }}{% if not fixture.is_active %} / inactive{% endif %}</span>
+      </div>
+      <div class="actions">
+        <a href="{% url 'inventory:room-3d' %}?fixture={{ fixture.code|urlencode }}">3D</a>
+        <a href="{% url 'inventory:fixture-edit' fixture.code %}">編集</a>
+        <a href="{% url 'inventory:zone-create' %}?fixture={{ fixture.code|urlencode }}">Zone追加</a>
+      </div>
+    </div>
+
+    <div class="layout-zone-grid">
+      {% for zone in fixture.zones.all %}
+      <div class="layout-zone{% if not zone.is_active %} inactive{% endif %}">
+        <strong><a href="{% url 'inventory:zone-detail' zone.code %}">{{ zone.code }}</a></strong>
+        <span>{{ zone.name }}</span>
+        <span class="help">{{ zone.get_kind_display }}{% if zone.level_order %} / 下から{{ zone.level_order }}段目{% endif %}{% if not zone.is_active %} / inactive{% endif %}</span>
+        <div class="actions">
+          <a href="{% url 'inventory:room-3d' %}?zone={{ zone.code|urlencode }}">3D</a>
+          <a href="{% url 'inventory:zone-edit' zone.code %}">編集</a>
+        </div>
+      </div>
+      {% empty %}<p class="help">Placement Zone未登録</p>{% endfor %}
+    </div>
+  </article>
+  {% empty %}<p>設備未登録</p>{% endfor %}
+</section>
+{% empty %}
+<section class="panel"><p>部屋が未登録です。</p></section>
+{% endfor %}
+{% endblock %}
