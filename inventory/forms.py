@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from django import forms
+from django.db import models
 
 from .models import CatalogItem, PhysicalUnit, PlacementZone, StockChange
 
 
 class StockAdjustmentForm(forms.Form):
-    class Operation(forms.TextChoices):
+    class Operation(models.TextChoices):
         ADD = "ADD", "追加"
         REMOVE = "REMOVE", "使用・減少"
 
@@ -64,7 +65,7 @@ class StockCreateForm(forms.Form):
 
 
 class MoveUnitForm(forms.Form):
-    class TargetType(forms.TextChoices):
+    class TargetType(models.TextChoices):
         ZONE = "ZONE", "棚・机・壁面などへ置く"
         SUPPORT = "SUPPORT", "別の物の上へ置く"
 
