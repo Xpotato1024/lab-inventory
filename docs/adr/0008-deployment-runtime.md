@@ -1,127 +1,115 @@
-# ADR-0008: Select deployment and runtime architecture
+# ADR-0008: Use laboratory workstation hosting
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 
 ## Context
 
-The laboratory has an always-on workstation capable of hosting background services and has access to a laboratory domain. However, the project explicitly prioritizes long-term maintainability and low operational burden, so managed/static deployment options must be considered rather than assuming self-hosting.
+The laboratory has an always-on workstation capable of hosting background services and has access to a laboratory domain. The project prioritizes long-term maintainability, low handover burden, and conventional tooling that future laboratory members can understand without learning a provider-specific application platform.
 
-The operational application is stateful: users must be able to change inventory, placement, layout metadata, and audit state from the GUI. Therefore deployment must support authenticated writes to one operational datastore.
+The operational application is stateful: users must be able to change inventory, placement, layout metadata, and audit state from the GUI. Deployment must therefore support authenticated transactional writes to one operational datastore.
 
-## Evaluation criteria
+GitHub Pages and managed full-stack platforms were evaluated before selecting the hosting model.
 
-The selected model should minimize the total handover burden, not merely the number of initial deployment commands.
+## Decision
 
-Important criteria are:
+Run the authoritative operational application on an always-on laboratory workstation.
 
-1. routine users need only a browser;
-2. no source-code changes for ordinary operations;
-3. one clear operational source of truth;
-4. straightforward authentication and access restriction;
-5. straightforward backup and disaster recovery;
-6. custom-domain support;
-7. low server/runtime maintenance burden;
-8. understandable local development and migration path;
-9. minimal provider-specific lock-in;
-10. ability to serve the procedural 3D UI and structured import/export workflows.
-
-## Option A: GitHub Pages as the operational application
-
-GitHub Pages is static hosting and does not execute Python or other conventional server-side application code. A Pages-only deployment therefore cannot directly provide the authenticated transactional write backend required by this system.
-
-It could host:
-
-- project documentation;
-- a read-only demonstration;
-- a static snapshot/viewer generated from exported data.
-
-It should not host the authoritative operational application.
-
-### Split Pages + external API variant
-
-A static Pages frontend could call a separately hosted API/database. This technically supports writes, but it introduces two deployment boundaries, cross-origin/authentication concerns, and a second operational component solely to preserve Pages hosting.
-
-This is not considered simpler than serving the frontend and backend from the same application runtime.
-
-## Option B: Laboratory workstation hosting
-
-Run one application on the laboratory workstation and publish it through a controlled ingress path.
-
-Candidate shape:
+The deployment boundary is:
 
 ```text
 Browser
-  -> HTTPS/custom domain
-  -> secure tunnel or reverse proxy
-  -> one application
-  -> operational database
+  -> HTTPS / laboratory custom domain
+  -> controlled ingress
+  -> one workstation-hosted application
+  -> one operational datastore
 ```
 
-If the laboratory domain is managed in Cloudflare, Cloudflare Tunnel is a strong ingress option because the workstation establishes outbound connections and no inbound application port must be opened. If the domain/network is not suitable for Cloudflare Tunnel, a conventional reverse proxy/TLS arrangement remains possible.
+The workstation is the application host, but it is not itself the source of truth. The operational datastore remains the authoritative state store as defined by ADR-0002.
 
-The application framework/database choice remains a sub-decision. Current candidates include Django with PostgreSQL and a deliberately evaluated Django/SQLite variant for very low concurrency. PostgreSQL is the safer production default; SQLite would reduce service count but introduces concurrency limits and requires carefully documented safe backup behavior.
+Normal users must never need shell access, source-code changes, or direct database access. Routine administration must be exposed through the GUI, validated structured import/export, and documented wrapper commands or scripts.
 
-### Advantages
+The exact application framework and database engine are separate implementation decisions. In particular, SQLite versus PostgreSQL is not decided by this ADR.
 
-- preserves the single-application architecture;
-- can use broadly understood server frameworks and databases;
-- full control over data and migration;
-- makes use of existing always-on laboratory infrastructure;
-- procedural 3D and GUI workflows have no special platform constraints.
+## Ingress
 
-### Costs
+Prefer an ingress design that minimizes workstation network administration.
 
-- workstation/OS/container lifecycle must be maintained;
-- database backups and restore procedures are laboratory responsibilities;
-- workstation/network outage affects the service;
-- secure ingress and application patching must be documented.
+If the laboratory domain and account ownership make it practical, an outbound secure tunnel such as Cloudflare Tunnel is preferred because it avoids exposing an inbound application port and delegates public TLS termination.
 
-## Option C: Cloudflare Workers + D1
+A conventional reverse proxy with HTTPS remains an acceptable fallback.
 
-Serve static assets and application API logic from one Cloudflare Worker and use D1 as the operational SQL datastore.
+The ingress mechanism is not part of the domain model and may be replaced without changing application semantics.
 
-Cloudflare Workers can serve a full-stack application and custom domains. D1 provides managed SQLite-semantics SQL storage and point-in-time recovery. Cloudflare Access can restrict access before requests reach the Worker.
+## Operational requirements
 
-### Advantages
+The workstation-hosted deployment must satisfy the following:
 
-- removes workstation, reverse-proxy, and database-server maintenance from the operational path;
-- frontend and backend can still deploy as one application;
-- custom-domain and TLS management are handled by the platform;
-- managed database recovery reduces routine backup burden;
-- Git-based CI/CD can make deployment repeatable.
+1. routine users need only a web browser;
+2. ordinary inventory and placement operations require no source-code changes;
+3. direct SQL must not be required for routine operation, deployment, backup, restore, or ordinary upgrades;
+4. application and datastore startup/shutdown must be documented and scriptable;
+5. backup and restore procedures must be documented and testable without ad-hoc database commands;
+6. secrets and credentials must not be committed to the repository;
+7. a workstation failure must be recoverable from repository state, configuration, and backups;
+8. the custom-domain and ingress ownership must be transferable to future maintainers.
 
-### Costs
+## Alternatives considered
 
-- application/runtime becomes Cloudflare-specific;
-- implementation would move away from the previously considered conventional Django stack;
-- local development and administration require Cloudflare tooling such as Wrangler;
-- account/domain ownership and access must be handed over correctly;
-- migration away from D1/Workers is possible but is a deliberate project rather than a simple server move.
+### GitHub Pages as the operational application
 
-## Preliminary assessment
+Rejected.
 
-- GitHub Pages alone: unsuitable for the operational application.
-- GitHub Pages + separate backend: technically possible but adds complexity without a clear benefit; not recommended.
-- Workstation-hosted single application: strong candidate because suitable hardware already exists and it preserves a conventional, portable architecture.
-- Workers + D1: strong alternative if minimizing server administration is valued more highly than provider neutrality and conventional backend tooling.
+GitHub Pages is static hosting and does not provide the authenticated transactional server-side write path required by the authoritative inventory application.
 
-The current preference is **Option B, workstation-hosted single application with simplified secure ingress**, but this ADR remains Proposed until the team explicitly accepts the operational trade-off against Option C.
+It remains suitable for:
+
+- project documentation;
+- a read-only demonstration;
+- static exported snapshots.
+
+### GitHub Pages plus a separate API/backend
+
+Rejected.
+
+This preserves static hosting only by introducing a second deployment boundary, separate authentication/API concerns, and additional operational complexity. It is not simpler than serving the UI and backend from one application runtime.
+
+### Cloudflare Workers + D1
+
+Not selected for the initial architecture.
+
+This approach would reduce server-administration burden, but would move the project toward Cloudflare-specific runtime, database, and deployment tooling. Because an always-on laboratory workstation already exists, the operational savings do not currently justify the additional platform coupling and handover requirements.
+
+This alternative may be reconsidered if maintaining the workstation becomes materially burdensome.
+
+## Consequences
+
+### Positive
+
+- uses infrastructure already available in the laboratory;
+- keeps the application architecture conventional and portable;
+- avoids splitting the frontend and backend solely for hosting reasons;
+- supports the full GUI, procedural 3D view, imports, audit history, and transactional updates without platform-specific restrictions;
+- leaves database and application framework choices independently replaceable;
+- allows secure publication under the laboratory domain.
+
+### Negative
+
+- workstation OS/runtime lifecycle remains a laboratory responsibility;
+- workstation or laboratory network outages can make the application unavailable;
+- backup and recovery must be actively maintained and tested;
+- security updates and ingress configuration remain operational responsibilities.
+
+## Related decisions
+
+- ADR-0001: single operational application
+- ADR-0002: operational datastore as source of truth
+- ADR-0006: GUI-first normal operations
+- ADR-0009: database engine selection (Proposed)
 
 ## External references
 
-- GitHub Pages server-side language limitation: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+- GitHub Pages: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
 - Cloudflare Tunnel: https://developers.cloudflare.com/tunnel/
-- Cloudflare Workers full-stack applications: https://developers.cloudflare.com/workers/static-assets/routing/full-stack-application/
+- Cloudflare Workers: https://developers.cloudflare.com/workers/
 - Cloudflare D1: https://developers.cloudflare.com/d1/
-- Cloudflare D1 Time Travel: https://developers.cloudflare.com/d1/reference/time-travel/
-- Cloudflare Access for Workers: https://developers.cloudflare.com/workers/configuration/cloudflare-access/
-
-## Decision required before implementation foundation
-
-Before application scaffolding is committed, choose either:
-
-1. workstation-hosted conventional application; or
-2. Workers + D1 managed application.
-
-The domain model and placement specifications are intentionally independent of this choice.
