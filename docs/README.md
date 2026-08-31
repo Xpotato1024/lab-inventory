@@ -17,10 +17,11 @@ This directory is the documentation entry point for `lab-inventory`.
 - `specifications/placement-model.md` — placement zones, ordering, stacking, and recursive placement rules.
 - `specifications/identifiers.md` — internal identifiers, human-facing codes, and label/QR rules.
 - `specifications/import-export.md` — validated structured import/export behavior.
+- `specifications/3d-view.md` — procedural 3D coordinate, fallback, stacking, and failure-boundary semantics.
 
 ## Operations
 
-`operations/` contains procedures for routine users and maintainers. These documents will grow as implementation begins.
+`operations/` contains procedures for routine users and maintainers. These documents grow alongside implementation so procedures stay aligned with the actual UI and commands.
 
 Routine operation must be GUI-first. Structured files are secondary interfaces for bulk operations, migration, and administration.
 
@@ -30,7 +31,7 @@ Routine deployment, backup, restore, and ordinary upgrades must not require dire
 
 `adr/` records why significant architectural choices were made. See `adr/README.md` for status conventions and the current decision index.
 
-The operational application is hosted on the laboratory always-on workstation under ADR-0008. Database engine selection remains open under ADR-0009.
+The current V1 foundation is workstation-hosted Django 5.2 LTS with SQLite, under ADR-0008 through ADR-0010. ADR-0011 keeps the derived Three.js viewer lightweight by avoiding a JavaScript build pipeline.
 
 ## Source-of-truth rule
 
