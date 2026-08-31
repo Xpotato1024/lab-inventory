@@ -5,6 +5,7 @@ This directory contains procedures for routine users and maintainers.
 ## Start here
 
 - [Daily operations](daily-operations.md) — search, stock changes, inventory counts, placement changes, and stacking.
+- [Layout management](layout-management.md) — Maintainer workflow for rooms, fixtures, rack shelves, desks, and wall zones.
 - [Users and roles](users-and-roles.md) — Viewer, Editor, Maintainer, staff, and superuser responsibilities.
 - [Backup and restore](backup-restore.md) — database-aware online backup and guarded offline restore.
 
@@ -15,17 +16,18 @@ Routine users should need only a browser and the physical labels/QR codes attach
 Routine operations include:
 
 - search for an item or physical unit;
-- view its normal storage location and, later, its 3D locator;
+- view its normal storage location and derived 3D locator;
 - move a physical unit to another placement zone or onto another physical unit;
 - add/remove stock;
 - perform inventory-count reconciliation;
+- print/read stable ID and QR labels;
 - review recent changes.
 
 ## Administrative operations
 
-Documented administrator workflows include or will include:
+Documented administrator/maintainer workflows include or will include:
 
-- create/deactivate fixtures and placement zones;
+- create/deactivate rooms, fixtures, and placement zones through the Layout UI;
 - bulk import with validation/preview;
 - user/access administration;
 - backup and restore;
