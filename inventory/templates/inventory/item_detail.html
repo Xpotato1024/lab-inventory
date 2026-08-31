@@ -19,14 +19,15 @@
     {% if item.minimum_stock != None %}<p>最低在庫目安: {{ item.minimum_stock }} {{ item.unit }}</p>{% endif %}
     <div class="table-wrap">
       <table>
-        <thead><tr><th>保管単位</th><th>数量</th></tr></thead>
+        <thead><tr><th>保管単位</th><th>数量</th><th>位置</th></tr></thead>
         <tbody>
           {% for stock in stocks %}
           <tr>
             <td><a href="{% url 'inventory:unit-detail' stock.holder.code %}">{{ stock.holder.code }} — {{ stock.holder.name }}</a></td>
             <td>{{ stock.quantity }} {{ item.unit }}</td>
+            <td><a href="{% url 'inventory:room-3d' %}?unit={{ stock.holder.code|urlencode }}">3D</a></td>
           </tr>
-          {% empty %}<tr><td colspan="2">在庫登録なし</td></tr>{% endfor %}
+          {% empty %}<tr><td colspan="3">在庫登録なし</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>
@@ -39,7 +40,9 @@
 <section class="panel">
   <h2>個体</h2>
   <ul class="plain-list">
-    {% for unit in units %}<li><a href="{% url 'inventory:unit-detail' unit.code %}">{{ unit.code }} — {{ unit.name }}</a></li>{% endfor %}
+    {% for unit in units %}
+      <li><a href="{% url 'inventory:unit-detail' unit.code %}">{{ unit.code }} — {{ unit.name }}</a> / <a href="{% url 'inventory:room-3d' %}?unit={{ unit.code|urlencode }}">3D</a></li>
+    {% endfor %}
   </ul>
 </section>
 {% endif %}
