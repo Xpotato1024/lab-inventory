@@ -31,6 +31,9 @@ jobs:
       - name: Prepare runtime directories
         run: mkdir -p var/data var/backups
 
+      - name: Check shell script syntax
+        run: sh -n scripts/*.sh
+
       - name: Check model migrations
         run: python manage.py makemigrations --check --dry-run --verbosity 3
 
@@ -57,11 +60,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare environment
+      - name: Prepare production-like environment
         run: |
-          cp .env.example .env
-          sed -i 's#^DJANGO_SECRET_KEY=.*#DJANGO_SECRET_KEY=ci-compose-only-secret-key-not-for-production#' .env
           mkdir -p var/data var/backups
+          cp .env.production.example .env
+          sed -i 's#^DJANGO_SECRET_KEY=.*#DJANGO_SECRET_KEY=ci-compose-only-secret-key-not-for-production#' .env
+          sed -i 's#^DJANGO_ALLOWED_HOSTS=.*#DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1#' .env
+          sed -i 's#^DJANGO_CSRF_TRUSTED_ORIGINS=.*#DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost#' .env
+          sed -i "s#^LAB_INVENTORY_HOST_DATA_DIR=.*#LAB_INVENTORY_HOST_DATA_DIR=${GITHUB_WORKSPACE}/var/data#" .env
+          sed -i "s#^LAB_INVENTORY_HOST_BACKUP_DIR=.*#LAB_INVENTORY_HOST_BACKUP_DIR=${GITHUB_WORKSPACE}/var/backups#" .env
+
+      - name: Run deployment preflight
+        run: sh scripts/preflight.sh
 
       - name: Start workstation stack
         run: docker compose up -d --build --wait
