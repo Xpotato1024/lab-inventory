@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}品目追加 | {{ holder.code }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:unit-detail' holder.code %}">{{ holder.code }}</a> › 品目追加</nav>
+<section class="hero compact"><h1>{{ holder.name }}に在庫品目を追加</h1></section>
+<section class="panel form-panel">
+  <p class="help">現在数量は初期棚卸として監査履歴に記録されます。</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><button type="submit">在庫管理を開始</button><a href="{% url 'inventory:unit-detail' holder.code %}">キャンセル</a></div>
+  </form>
+</section>
+{% endblock %}
