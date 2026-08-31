@@ -28,7 +28,9 @@ sudo install -d -o "$USER" -g "$(id -gn)" /srv/lab-inventory/data
 sudo install -d -o "$USER" -g "$(id -gn)" /srv/lab-inventory/backups
 ```
 
-The database and backup paths should live on reliable local storage. A local backup directory on the same workstation is **not** sufficient disaster recovery; copy verified backups to separate storage as well.
+The database and local backup paths should live on reliable local storage.
+
+Also prepare or mount a backup destination backed by a **different physical system**, such as a NAS share. Do not treat another directory on the same workstation as disaster recovery.
 
 ## 2. Prepare `.env`
 
@@ -55,6 +57,12 @@ LAB_INVENTORY_HOST_DATA_DIR=/srv/lab-inventory/data
 LAB_INVENTORY_HOST_BACKUP_DIR=/srv/lab-inventory/backups
 ```
 
+When separate mounted storage is available, also set:
+
+```text
+LAB_INVENTORY_OFFSITE_BACKUP_DIR=/path/to/separate-storage/lab-inventory
+```
+
 The production hostname should be chosen before durable QR labels are printed.
 
 ## 3. Run preflight
@@ -68,12 +76,12 @@ Preflight verifies:
 - Docker and Docker Compose v2 are available;
 - `.env` is present and production mode is selected;
 - the secret is not the repository placeholder;
-- persistent directories exist and are writable;
+- local persistent directories exist and are writable;
 - Compose configuration parses;
 - the image builds;
 - Django deployment checks pass.
 
-It does not start the long-running application service.
+It does not start the long-running application service and does not require an off-workstation mount to exist. Backup mirroring is tested separately once that destination is configured.
 
 ## 4. Start the application
 
@@ -130,21 +138,44 @@ After ingress is live:
 
 Do not bulk-print durable QR labels until this check is complete.
 
+## 8. Verify separate-storage backup mirroring
+
+After `LAB_INVENTORY_OFFSITE_BACKUP_DIR` points to a mounted destination on another physical system:
+
+```sh
+sh scripts/backup-mirror.sh
+```
+
+Confirm that:
+
+- a timestamped backup appears under the local host backup directory;
+- a matching timestamped backup appears on the separate storage;
+- the command exits successfully without a comparison error;
+- the mirrored file remains readable after unmounting/reconnecting the storage as appropriate for that storage system.
+
+Only after this manual test should unattended daily scheduling be enabled. See [Backup and restore](backup-restore.md).
+
 ## Backup immediately after initial configuration
 
-Once initial users/master/layout data exist:
+Once initial users/master/layout data exist and separate storage is configured, prefer:
+
+```sh
+sh scripts/backup-mirror.sh
+```
+
+If separate storage is temporarily unavailable, create a verified local backup with:
 
 ```sh
 sh scripts/backup.sh
 ```
 
-Then copy the newly verified backup to separate storage. See [Backup and restore](backup-restore.md).
+and mirror it when the separate storage is restored. A local-only backup is not considered complete disaster recovery.
 
 ## Update procedure
 
 Before updating application code:
 
-1. create and verify a backup;
+1. create and verify a backup; mirror it to separate storage when available;
 2. update the Git checkout to the reviewed target commit/release;
 3. run `sh scripts/preflight.sh`;
 4. rebuild/restart with `docker compose up -d --build --wait`;
