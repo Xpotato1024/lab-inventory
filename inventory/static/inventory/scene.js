@@ -119,7 +119,19 @@ function addEdges(mesh, color, opacity = 0.85) {
   return edges;
 }
 
-function addLocalBox(parent, { size, center, color, opacity = 1, type, node, highlighted = false }) {
+function addLocalBox(
+  parent,
+  {
+    size,
+    center,
+    color,
+    opacity = 1,
+    type,
+    node,
+    highlighted = false,
+    rotationY = 0,
+  },
+) {
   const threeSize = toThreeSize(size);
   const geometry = new THREE.BoxGeometry(threeSize.x, threeSize.y, threeSize.z);
   const material = new THREE.MeshStandardMaterial({
@@ -136,6 +148,7 @@ function addLocalBox(parent, { size, center, color, opacity = 1, type, node, hig
   }
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.copy(center);
+  mesh.rotation.y = rotationY;
   parent.add(mesh);
   addEdges(mesh, highlighted ? COLORS.highlight : COLORS.edge, highlighted ? 1 : 0.65);
   if (type && node) registerEntity(mesh, type, node);
@@ -224,7 +237,7 @@ for (const node of data.units) {
   const [group, fixtureOrigin] = fixtureGroupAndOrigin(rootZone.fixture_code);
   if (!group) continue;
   const highlighted = isHighlighted('unit', node.code);
-  const mesh = addLocalBox(group, {
+  addLocalBox(group, {
     size: node.size_mm,
     center: toLocalCenter(node.origin_mm, node.size_mm, fixtureOrigin),
     color: unitColor(node.kind),
@@ -232,8 +245,8 @@ for (const node of data.units) {
     type: 'unit',
     node,
     highlighted,
+    rotationY: -THREE.MathUtils.degToRad(node.rotation_z_deg || 0),
   });
-  mesh.rotation.y = -THREE.MathUtils.degToRad(node.rotation_z_deg || 0);
 }
 
 const [roomWidth, roomDepth, roomHeight] = data.room.size_mm.map((value) => value * MM);
