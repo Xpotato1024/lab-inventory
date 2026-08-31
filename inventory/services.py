@@ -149,22 +149,24 @@ def move_unit(
 
 
 def resolve_effective_zone(unit: PhysicalUnit) -> PlacementZone | None:
-    """Resolve a stacked unit to the placement zone at the root of its support chain."""
+    """Resolve current effective zone from authoritative DB rows, ignoring stale ORM relation caches."""
 
-    current = unit
+    current_id = unit.pk
     visited: set[object] = set()
-    while True:
-        if current.pk in visited:
+    while current_id:
+        if current_id in visited:
             raise ValidationError("Support cycle detected while resolving effective zone.")
-        visited.add(current.pk)
+        visited.add(current_id)
 
-        try:
-            placement = current.placement
-        except Placement.DoesNotExist:
+        row = (
+            Placement.objects.filter(unit_id=current_id)
+            .values("zone_id", "support_unit_id")
+            .first()
+        )
+        if row is None:
             return None
+        if row["zone_id"]:
+            return PlacementZone.objects.get(pk=row["zone_id"])
+        current_id = row["support_unit_id"]
 
-        if placement.zone_id:
-            return placement.zone
-        if not placement.support_unit_id:
-            return None
-        current = placement.support_unit
+    return None
