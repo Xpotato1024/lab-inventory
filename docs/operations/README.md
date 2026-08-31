@@ -8,6 +8,7 @@ This directory contains procedures for routine users and maintainers.
 - [Master-data management](master-data.md) — Maintainer workflow for CatalogItems and PhysicalUnits.
 - [Layout management](layout-management.md) — Maintainer workflow for rooms, fixtures, rack shelves, desks, and wall zones.
 - [Users and roles](users-and-roles.md) — Viewer, Editor, Maintainer, staff, and superuser responsibilities.
+- [Workstation deployment](workstation-deployment.md) — production `.env`, persistent storage, preflight, Compose startup, and ingress boundary.
 - [Backup and restore](backup-restore.md) — database-aware online backup and guarded offline restore.
 
 ## Routine-user principle
@@ -33,8 +34,8 @@ Documented administrator/maintainer workflows include or will include:
 - create/deactivate rooms, fixtures, and placement zones through the Layout UI;
 - bulk import with validation/preview;
 - user/access administration;
+- workstation deployment and controlled upgrades;
 - backup and restore;
-- application upgrade and rollback;
 - label/QR regeneration;
 - troubleshooting.
 
