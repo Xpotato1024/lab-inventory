@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:master' %}">Master</a> › {{ entity_label }}</nav>
+<section class="hero compact">
+  <p class="eyebrow">{{ entity_label }}</p>
+  <h1>{{ title }}</h1>
+  <p>IDは作成後に通常変更しません。不要になった対象は削除せず「使用中」を外して退役させます。</p>
+</section>
+
+<section class="form-panel">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions">
+      <button type="submit">保存</button>
+      <a href="{% url 'inventory:master' %}">キャンセル</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
