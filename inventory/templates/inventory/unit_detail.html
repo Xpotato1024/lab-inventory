@@ -13,7 +13,10 @@
 <section class="panel">
   <div class="section-heading">
     <h2>通常保管位置</h2>
-    {% if perms.inventory.change_placement %}<a class="button-link" href="{% url 'inventory:unit-move' unit.code %}">位置を変更</a>{% endif %}
+    <div class="actions">
+      <a class="button-link" href="{% url 'inventory:room-3d' %}?unit={{ unit.code|urlencode }}">3Dで表示</a>
+      {% if perms.inventory.change_placement %}<a class="button-link" href="{% url 'inventory:unit-move' unit.code %}">位置を変更</a>{% endif %}
+    </div>
   </div>
   {% if placement %}
     {% if placement.zone %}
