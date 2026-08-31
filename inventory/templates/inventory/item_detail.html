@@ -10,6 +10,7 @@
   {% if item.manufacturer or item.part_number %}
     <p>{{ item.manufacturer }}{% if item.part_number %} / {{ item.part_number }}{% endif %}</p>
   {% endif %}
+  {% if perms.inventory.change_catalogitem %}<p><a href="{% url 'inventory:item-edit' item.code %}">マスタ情報を編集</a></p>{% endif %}
 </section>
 
 <section class="panel">
