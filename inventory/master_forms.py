@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django import forms
+from django.db.models import Q
 
 from .layout_forms import StableCodeModelForm
 from .models import CatalogItem, PhysicalUnit
@@ -99,6 +100,11 @@ class PhysicalUnitForm(StableCodeModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["catalog_item"].queryset = CatalogItem.objects.filter(is_active=True).order_by(
-            "code"
-        )
+        query = Q(is_active=True)
+        if (
+            self.instance
+            and not self.instance._state.adding
+            and self.instance.catalog_item_id is not None
+        ):
+            query |= Q(pk=self.instance.catalog_item_id)
+        self.fields["catalog_item"].queryset = CatalogItem.objects.filter(query).order_by("code")
