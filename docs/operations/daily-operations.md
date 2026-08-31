@@ -1,6 +1,6 @@
 # Daily operations
 
-This document describes the intended browser-first routine workflow. It deliberately uses laboratory concepts rather than database terminology.
+This document describes the browser-first routine workflow. It deliberately uses laboratory concepts rather than database terminology.
 
 ## Find an item
 
@@ -8,8 +8,22 @@ This document describes the intended browser-first routine workflow. It delibera
 2. Enter a name, part number, item code, physical-unit code, or placement-zone code in the search box.
 3. Open the matching item, box/equipment/tool, or storage location.
 4. Use the displayed normal storage position to locate the object.
+5. Choose **3Dで表示** when spatial context is helpful.
 
-The future procedural 3D view will be another locator on these same detail pages; it will not change where the authoritative data is stored.
+The 3D view is generated from the same SoT data. It is a locator aid, not a second authoritative model.
+
+## Check low stock
+
+The home page reports the number of quantity-tracked items below their configured minimum-stock threshold.
+
+Choose **一覧を見る** to inspect:
+
+- current aggregate quantity across all holders;
+- minimum-stock target;
+- exact shortage amount;
+- holders/containers where current stock is recorded.
+
+Items without a minimum-stock threshold are intentionally excluded from this warning list.
 
 ## Record stock use or arrival
 
@@ -51,7 +65,16 @@ Temporary movement while actively using a tool does not normally require an upda
 
 ## Left-to-right order
 
-A shelf has no fixed number of slots. Units directly on the same zone are sorted by an internal mutable order value, and the UI derives labels such as:
+A shelf has no fixed number of slots. The normal GUI uses relative choices:
+
+- leftmost;
+- rightmost;
+- immediately before a selected unit;
+- immediately after a selected unit.
+
+The application converts that choice to its internal mutable ordering and normalizes sibling order automatically.
+
+The UI derives labels such as:
 
 ```text
 左から1番目
@@ -59,9 +82,7 @@ A shelf has no fixed number of slots. Units directly on the same zone are sorted
 左から3番目
 ```
 
-The displayed ordinal is not an identifier. Inserting another object changes later ordinals without changing object identity.
-
-The current V1 form exposes a numeric order value as an advanced fallback. A later GUI may provide drag/reorder controls so routine operators do not need to think about the numeric value.
+The displayed ordinal is not an identifier. Inserting another object changes later ordinals without changing object identity or printed labels.
 
 ## Stacked objects
 
@@ -69,7 +90,7 @@ If `C-002` is placed on `C-001`, and `C-001` is placed on `Z-010`, then `C-002` 
 
 Moving the root unit changes the effective location of everything stacked above it without rewriting every descendant placement record.
 
-The application rejects self-support and support cycles.
+The application rejects self-support and support cycles. The 3D view renders the same recursive relationship rather than maintaining a separate stack model.
 
 ## Add a newly tracked stock item to a holder
 
@@ -77,4 +98,4 @@ From a physical-unit detail page choose **品目を追加**.
 
 Select a quantity-tracked catalog item and enter the physical current quantity. The initial quantity is recorded as an initial inventory-count audit event.
 
-Creating catalog items, rooms, fixtures, zones, and physical units is master-data maintenance rather than a routine stock operation.
+Creating/editing CatalogItems and PhysicalUnits is handled through the Maintainer **Master** UI. Room/fixture/zone maintenance is handled through **Layout**.
