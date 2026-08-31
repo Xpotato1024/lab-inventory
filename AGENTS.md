@@ -37,6 +37,7 @@ Do not turn the project into:
 ## Operational constraints
 
 - Routine users must not need shell access, Git, Python, JavaScript, SQL, or database administration.
+- Routine deployment, backup, restore, and ordinary upgrades must not require manually written SQL or interactive database administration.
 - GUI operations are the default path for normal changes.
 - Structured imports must validate before mutation and provide a preview before confirmation.
 - Bulk human-edited tabular data should prefer CSV/XLSX; hierarchical layout/configuration may use YAML; machine-oriented interchange may use JSON.
@@ -46,9 +47,11 @@ Do not turn the project into:
 ## Architecture discipline
 
 - Keep the application as a single operational system unless a concrete requirement justifies decomposition.
+- The authoritative application is hosted on the laboratory always-on workstation; see ADR-0008.
+- Keep ingress replaceable and independent from domain semantics.
 - Avoid introducing infrastructure components without a demonstrated operational need.
 - Prefer boring, well-supported technology over novelty.
-- Deployment/runtime technology remains undecided until ADR-0008 is accepted or superseded.
+- Do not assume a database engine until ADR-0009 is accepted or superseded.
 
 ## Documentation discipline
 
