@@ -22,4 +22,5 @@ Accepted ADRs should not be silently rewritten to change their decision. Add a n
 - [ADR-0006: Make normal operations GUI-first](0006-gui-first-operations.md) — Accepted
 - [ADR-0007: Separate immutable identity from physical position](0007-stable-identifiers.md) — Accepted
 - [ADR-0008: Use laboratory workstation hosting](0008-deployment-runtime.md) — Accepted
-- [ADR-0009: Select the operational database engine](0009-database-engine.md) — Proposed
+- [ADR-0009: Use SQLite as the V1 operational database](0009-database-engine.md) — Accepted
+- [ADR-0010: Use a conventional Django server-rendered application stack](0010-application-stack.md) — Accepted
