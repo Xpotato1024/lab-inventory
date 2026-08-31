@@ -15,7 +15,9 @@ Viewer can:
 - sign in;
 - search items, physical units, and placement zones;
 - inspect normal storage locations and inventory;
-- view the derived 3D locator when implemented.
+- view the derived 3D locator;
+- generate/read physical QR labels and printable label sheets;
+- export read-only state snapshots.
 
 Viewer cannot change operational data.
 
@@ -29,15 +31,16 @@ Editor includes Viewer behavior and can:
 - increase/decrease stock through the audited GUI;
 - record an inventory-count correction;
 - change the normal placement of a physical unit;
-- place a unit onto another physical unit.
+- place a unit onto another physical unit;
+- use validated structured imports for supported stock/placement workflows.
 
 Every operational mutation goes through application service logic and creates its audit record in the same transaction.
 
 ### Maintainer
 
-For members responsible for laboratory layout/master data and system administration.
+For members responsible for laboratory layout and master data.
 
-Maintainer can manage inventory master data such as:
+Maintainer includes Editor behavior and can manage layout/master data such as:
 
 - rooms;
 - fixtures;
@@ -45,18 +48,23 @@ Maintainer can manage inventory master data such as:
 - catalog items;
 - physical units.
 
+Room/Fixture/PlacementZone layout management is available through the normal `Layout` web UI and does not require Django Admin or shell access.
+
+Routine Maintainer permissions intentionally do **not** include Django `delete_*` permissions for persistent laboratory entities. Retire obsolete rooms, fixtures, zones, catalog items, or physical units by marking them inactive so printed IDs, historical records, and audit references remain meaningful.
+
 Operational `Stock` and `Placement` records remain read-only in Django Admin. A Maintainer should use the normal audited workflows for stock and placement changes rather than editing those rows directly.
 
 ## Superuser and Django Admin
 
 A Django superuser is a technical administrator and bypasses normal permission checks. Keep the number of superusers small.
 
-Django Admin also requires the user's `is_staff` flag. Membership in the Maintainer group does not automatically set `is_staff` because that account-level decision should remain explicit.
+Django Admin also requires the user's `is_staff` flag. Membership in the Maintainer group does not automatically set `is_staff`; routine layout work does not need it.
 
 A typical setup is:
 
 - ordinary laboratory member: Viewer or Editor, not staff;
-- master-data maintainer: Maintainer + `is_staff`;
+- layout/master-data maintainer: Maintainer, normally not staff;
+- technical administrator who needs Django Admin: Maintainer + `is_staff` or a separately controlled staff account;
 - system owner/emergency administrator: superuser.
 
 ## Create the first administrator
