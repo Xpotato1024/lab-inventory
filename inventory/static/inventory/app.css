@@ -1,6 +1,7 @@
 :root {
   color-scheme: light dark;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
 }
 
 * {
@@ -10,6 +11,10 @@
 body {
   margin: 0;
   min-height: 100vh;
+}
+
+a {
+  color: inherit;
 }
 
 .site-header {
@@ -22,9 +27,22 @@ body {
 }
 
 .brand {
-  color: inherit;
   font-weight: 700;
   text-decoration: none;
+}
+
+.header-actions,
+.section-heading,
+.search-row,
+.form-actions,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-actions {
+  flex-wrap: wrap;
 }
 
 .content {
@@ -33,34 +51,83 @@ body {
   padding: 2rem 0 4rem;
 }
 
-.hero,
-.panel,
-.auth-card {
-  max-width: 48rem;
+.hero {
+  max-width: 52rem;
+}
+
+.hero.compact h1 {
+  margin-bottom: 0.25rem;
 }
 
 .panel,
-.auth-card {
-  margin-top: 2rem;
+.auth-card,
+.search-form,
+.result-section {
+  margin-top: 1.5rem;
+}
+
+.panel,
+.auth-card,
+.form-panel {
   padding: 1.25rem;
   border: 1px solid currentColor;
   border-radius: 0.75rem;
 }
 
-.eyebrow {
+.section-heading {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.eyebrow,
+.position-label,
+.help,
+.breadcrumbs {
   font-size: 0.875rem;
+}
+
+.eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-button,
-input {
+.help {
+  opacity: 0.8;
+}
+
+.search-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.search-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+input,
+select,
+textarea,
+button {
   font: inherit;
 }
 
-button {
+input,
+select,
+textarea {
+  max-width: 100%;
+  padding: 0.55rem 0.65rem;
+}
+
+button,
+.button-link {
+  display: inline-block;
   padding: 0.55rem 0.9rem;
+  border: 1px solid currentColor;
+  border-radius: 0.4rem;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .link-button {
@@ -71,6 +138,126 @@ button {
   text-decoration: underline;
 }
 
+.result-card,
+.placement-card {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  margin: 0.45rem 0;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  text-decoration: none;
+}
+
+.result-card {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.result-card span {
+  opacity: 0.75;
+}
+
+.placement-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.placement-card {
+  min-width: 9rem;
+  flex-direction: column;
+}
+
+.position-label {
+  opacity: 0.75;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid currentColor;
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.45rem 1rem;
+}
+
+.detail-list dt {
+  font-weight: 600;
+}
+
+.detail-list dd {
+  margin: 0;
+}
+
+.plain-list,
+.audit-list {
+  padding-left: 1.25rem;
+}
+
+.messages {
+  margin-bottom: 1rem;
+}
+
+.message,
+.warning,
 .error {
   font-weight: 600;
+}
+
+.form-panel form > p {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 40rem;
+}
+
+.form-panel textarea {
+  width: 100%;
+}
+
+.form-actions {
+  margin-top: 1.25rem;
+}
+
+.metric {
+  font-size: 1.15rem;
+}
+
+@media (max-width: 40rem) {
+  .site-header,
+  .section-heading,
+  .search-row,
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+  }
+
+  .search-row button,
+  .button-link,
+  .form-actions button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .detail-list {
+    grid-template-columns: 1fr;
+  }
 }
