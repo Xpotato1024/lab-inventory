@@ -1,6 +1,6 @@
 # Operations documentation
 
-This directory will contain procedures for routine users and maintainers.
+This directory contains procedures for routine users and maintainers.
 
 ## Routine-user principle
 
@@ -17,18 +17,20 @@ Routine operations will include:
 
 ## Administrative operations
 
-Documented administrator workflows will include:
+Documented administrator workflows include or will include:
 
 - create/deactivate fixtures and placement zones;
 - bulk import with validation/preview;
 - user/access administration;
-- backup and restore;
+- [backup and restore](backup-restore.md);
 - application upgrade and rollback;
 - label/QR regeneration;
 - troubleshooting.
+
+Routine maintenance must not require manually written SQL or interactive database administration.
 
 ## Location-update policy
 
 The recorded placement represents the normal storage location. Temporary movement during active use does not normally require an update. A change should be recorded when the normal storage position changes, for example after a cleanup, reorganization, or long-term relocation.
 
-Detailed procedures will be added alongside implementation so screenshots and command examples stay aligned with the actual application.
+Detailed GUI procedures should be added alongside implementation so screenshots and command examples stay aligned with the actual application.
