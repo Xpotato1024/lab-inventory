@@ -11,13 +11,22 @@
   <header class="site-header">
     <a class="brand" href="{% url 'inventory:home' %}">Lab Inventory</a>
     {% if user.is_authenticated %}
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button class="link-button" type="submit">ログアウト</button>
-      </form>
+      <nav class="header-actions" aria-label="ユーザーメニュー">
+        {% if user.is_staff %}<a href="{% url 'admin:index' %}">管理</a>{% endif %}
+        <span>{{ user.get_username }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="link-button" type="submit">ログアウト</button>
+        </form>
+      </nav>
     {% endif %}
   </header>
   <main class="content">
+    {% if messages %}
+      <div class="messages" aria-live="polite">
+        {% for message in messages %}<p class="message">{{ message }}</p>{% endfor %}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 </body>
