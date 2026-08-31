@@ -44,14 +44,38 @@ Do not turn the project into:
 - Import/export files are interfaces, not competing sources of truth.
 - Mutating stock or placement must create an audit record in the same logical transaction.
 
+## Accepted V1 architecture
+
+- Authoritative runtime: laboratory always-on workstation (ADR-0008).
+- Application: Python 3.13 + Django 5.2 LTS (ADR-0010).
+- UI: server-rendered Django templates with minimal vanilla JavaScript.
+- 3D: Three.js only for the derived procedural locator view.
+- Production application server: Gunicorn.
+- Static application assets: WhiteNoise.
+- Operational datastore: SQLite on a local workstation filesystem (ADR-0009).
+- Deployment interface: Docker Compose.
+- No Node.js runtime or frontend build pipeline is required for V1.
+
+## SQLite discipline
+
+- Keep every write transaction short.
+- Do validation, parsing, preview generation, user interaction, and network I/O outside write transactions.
+- Do not enable `ATOMIC_REQUESTS` globally.
+- Do not build correctness around `select_for_update()`; SQLite does not provide it.
+- Prefer atomic database updates plus constraints over application-side read-modify-write for stock quantities.
+- Use a database-aware backup mechanism. Do not copy an open SQLite database file as the normal backup procedure.
+- Keep the database on a local filesystem, not NFS/SMB or another network filesystem.
+- Treat recurring lock timeouts under correctly short transactions as a PostgreSQL migration signal, not something to hide indefinitely with larger timeouts.
+
 ## Architecture discipline
 
 - Keep the application as a single operational system unless a concrete requirement justifies decomposition.
-- The authoritative application is hosted on the laboratory always-on workstation; see ADR-0008.
 - Keep ingress replaceable and independent from domain semantics.
 - Avoid introducing infrastructure components without a demonstrated operational need.
 - Prefer boring, well-supported technology over novelty.
-- Do not assume a database engine until ADR-0009 is accepted or superseded.
+- Prefer Django built-ins and the Python standard library before adding dependencies.
+- Do not introduce npm/pnpm/yarn as a production or routine-development requirement without a new accepted ADR.
+- Do not introduce a separate API/frontend deployment boundary without a new accepted ADR.
 
 ## Documentation discipline
 
@@ -75,3 +99,4 @@ Before considering a change complete:
 3. Update affected documentation.
 4. Confirm that routine workflows remain possible without source-code changes.
 5. Check that any new dependency or service is justified against simpler alternatives.
+6. Run Django checks/tests and, for deployment changes, exercise backup/restore and container startup paths.
