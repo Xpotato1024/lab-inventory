@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import (
+    activity_views,
     bulk_views,
     label_views,
     layout_views,
@@ -15,6 +16,7 @@ app_name = "inventory"
 urlpatterns = [
     path("healthz/", views.healthz, name="healthz"),
     path("", views.home, name="home"),
+    path("activity/", activity_views.activity, name="activity"),
     path("3d/", scene_views.room_3d, name="room-3d"),
     path("labels/", label_views.labels_index, name="labels"),
     path("labels/print/", label_views.labels_print, name="labels-print"),
