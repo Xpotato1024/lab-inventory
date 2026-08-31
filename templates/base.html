@@ -14,6 +14,7 @@
     {% if user.is_authenticated %}
       <nav class="header-actions" aria-label="ユーザーメニュー">
         <a href="{% url 'inventory:room-3d' %}">3D</a>
+        <a href="{% url 'inventory:activity' %}">Activity</a>
         <a href="{% url 'inventory:labels' %}">Labels</a>
         <a href="{% url 'inventory:export-snapshot' %}">Export</a>
         {% if perms.inventory.change_stock or perms.inventory.change_placement %}<a href="{% url 'inventory:structured-import' %}">Import</a>{% endif %}
