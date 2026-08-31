@@ -238,6 +238,32 @@ td {
   font-size: 1.15rem;
 }
 
+.label-selection-form > .form-actions {
+  justify-content: flex-end;
+}
+
+.label-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.label-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.label-choice input {
+  margin-top: 0.25rem;
+  flex: none;
+}
+
 .scene-toolbar {
   display: flex;
   align-items: center;
