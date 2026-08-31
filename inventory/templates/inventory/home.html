@@ -9,6 +9,22 @@
   <p>品名、型番、箱ID、棚IDなどから通常保管位置と在庫を検索します。</p>
 </section>
 
+{% if low_stock_count %}
+<section class="panel warning-panel">
+  <div class="section-heading">
+    <div>
+      <h2>在庫不足 {{ low_stock_count }}件</h2>
+      <p>最低在庫目安を下回っている数量管理品があります。</p>
+    </div>
+    <a class="button-link" href="{% url 'inventory:low-stock' %}">一覧を見る</a>
+  </div>
+</section>
+{% else %}
+<section class="panel status-ok">
+  <p><strong>在庫警告なし</strong> — 最低在庫目安を設定した品目に不足はありません。</p>
+</section>
+{% endif %}
+
 <form class="search-form" method="get" role="search">
   <label for="search-q">検索</label>
   <div class="search-row">
