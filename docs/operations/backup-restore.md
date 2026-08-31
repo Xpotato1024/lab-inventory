@@ -14,9 +14,11 @@ The host paths mounted at those locations are configured by:
 - `LAB_INVENTORY_HOST_DATA_DIR`
 - `LAB_INVENTORY_HOST_BACKUP_DIR`
 
-The backup directory must also be replicated away from the workstation. A second directory on the same workstation is not sufficient disaster recovery.
+For disaster recovery, configure `LAB_INVENTORY_OFFSITE_BACKUP_DIR` as a **mounted path backed by a different physical system**, for example a NAS share or other independently stored filesystem.
 
-## Create an online backup
+A second directory or second disk path on the same workstation is not considered sufficient disaster recovery by itself.
+
+## Create an online local backup
 
 The application may remain online.
 
@@ -28,15 +30,52 @@ The command uses SQLite's Online Backup API through Python and verifies the resu
 
 Do **not** use `cp` on the live operational database as the normal backup procedure.
 
+## Create and mirror a verified backup
+
+For routine scheduled protection, prefer:
+
+```sh
+sh scripts/backup-mirror.sh
+```
+
+Requirements:
+
+1. the application is running;
+2. `LAB_INVENTORY_HOST_BACKUP_DIR` points to the local host backup directory;
+3. `LAB_INVENTORY_OFFSITE_BACKUP_DIR` points to a mounted, writable path on separate storage.
+
+The wrapper:
+
+1. asks the running application to create a database-aware online backup under `/backups`;
+2. relies on the application command to run SQLite integrity and foreign-key checks before success;
+3. confirms the corresponding host backup file exists;
+4. copies the verified file to a temporary name on separate storage;
+5. compares the local and mirrored files byte-for-byte;
+6. renames the temporary copy to its final timestamped filename only after comparison succeeds.
+
+If copying or comparison fails, no incomplete file is promoted to the final mirrored-backup filename.
+
+### Suggested daily scheduling
+
+Once a real separate-storage mount is configured and tested manually, a simple host cron entry is sufficient. Example for a checkout under `/opt/lab-inventory`:
+
+```cron
+17 3 * * * cd /opt/lab-inventory && sh scripts/backup-mirror.sh >> /var/log/lab-inventory-backup.log 2>&1
+```
+
+The exact schedule and log location are workstation policy. Run the command manually first and confirm a valid file appears on the separate storage before enabling unattended scheduling.
+
+Do not add an automatic deletion job until a retention policy has been explicitly agreed and at least one independently stored known-good backup is confirmed.
+
 ## Verify a backup manually
 
-Normally backup verification is automatic. For troubleshooting:
+Normally local backup verification is automatic. For troubleshooting:
 
 ```sh
 docker compose exec -T web python manage.py verify_db /backups/<filename>.sqlite3
 ```
 
-A successful result means SQLite integrity and foreign-key checks passed. It does not replace application-level validation or an off-workstation backup policy.
+A successful result means SQLite integrity and foreign-key checks passed. It does not replace application-level validation or testing that the separate-storage copy can actually be read during recovery.
 
 ## Restore
 
@@ -47,6 +86,8 @@ List the host backup directory and select the intended snapshot, then run:
 ```sh
 sh scripts/restore.sh <backup-filename>.sqlite3
 ```
+
+If the required backup exists only on separate storage, copy that verified backup into `LAB_INVENTORY_HOST_BACKUP_DIR` first. Do not restore directly across an unreliable network mount.
 
 The wrapper:
 
@@ -88,8 +129,12 @@ A replacement workstation needs only:
 4. an off-workstation SQLite backup;
 5. the documented ingress configuration.
 
-Create the host data/backup directories, start the stack once if necessary, place the selected backup in the mounted backup directory, and use the standard restore wrapper.
+Create the host data/backup directories, start the stack once if necessary, copy the selected separate-storage backup into the mounted local backup directory, and use the standard restore wrapper.
+
+After recovery, immediately run a new local + mirrored backup and verify the production hostname/QR workflow.
 
 ## Backup retention
 
-Exact retention is an operations policy rather than application semantics. A reasonable initial policy is to retain multiple recent daily snapshots plus less frequent older snapshots, with at least one copy outside the workstation. Do not automatically delete the only known-good backup.
+Exact retention is an operations policy rather than application semantics. A reasonable initial policy is to retain multiple recent daily snapshots plus less frequent older snapshots, with at least one copy outside the workstation.
+
+The application intentionally does not automatically delete backups in V1. This avoids turning a retention configuration mistake into silent loss of the only known-good recovery point.
