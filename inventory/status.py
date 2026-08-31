@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from django.db.models import DecimalField, F, Sum, Value
+from django.db.models import DecimalField, ExpressionWrapper, F, Sum, Value
 from django.db.models.functions import Coalesce
 
 from .models import CatalogItem
@@ -29,7 +29,17 @@ def quantity_items_with_totals():
 def low_stock_items():
     """Return threshold-configured items whose aggregate stock is below the threshold."""
 
-    return quantity_items_with_totals().filter(
-        minimum_stock__isnull=False,
-        total_stock__lt=F("minimum_stock"),
-    ).order_by("total_stock", "code")
+    return (
+        quantity_items_with_totals()
+        .filter(
+            minimum_stock__isnull=False,
+            total_stock__lt=F("minimum_stock"),
+        )
+        .annotate(
+            shortage=ExpressionWrapper(
+                F("minimum_stock") - F("total_stock"),
+                output_field=STOCK_TOTAL_FIELD,
+            )
+        )
+        .order_by("total_stock", "code")
+    )
