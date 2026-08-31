@@ -3,7 +3,7 @@ from __future__ import annotations
 from django import forms
 from django.db import models
 
-from .models import CatalogItem, PhysicalUnit, PlacementZone, StockChange
+from .models import CatalogItem, PhysicalUnit, Placement, PlacementZone, StockChange
 
 
 class StockAdjustmentForm(forms.Form):
@@ -69,6 +69,12 @@ class MoveUnitForm(forms.Form):
         ZONE = "ZONE", "棚・机・壁面などへ置く"
         SUPPORT = "SUPPORT", "別の物の上へ置く"
 
+    class Position(models.TextChoices):
+        LEFTMOST = "LEFTMOST", "左端"
+        RIGHTMOST = "RIGHTMOST", "右端"
+        BEFORE = "BEFORE", "指定した物の左"
+        AFTER = "AFTER", "指定した物の右"
+
     target_type = forms.ChoiceField(
         label="配置方法",
         choices=TargetType.choices,
@@ -84,11 +90,16 @@ class MoveUnitForm(forms.Form):
         queryset=PhysicalUnit.objects.none(),
         required=False,
     )
-    order_key = forms.IntegerField(
-        label="並び順",
-        min_value=0,
-        initial=100,
-        help_text="通常は自動値のままで構いません。小さいほど左・手前に表示されます。",
+    position = forms.ChoiceField(
+        label="左右位置",
+        choices=Position.choices,
+        initial=Position.RIGHTMOST,
+    )
+    reference_unit = forms.ModelChoiceField(
+        label="基準にする物",
+        queryset=PhysicalUnit.objects.none(),
+        required=False,
+        help_text="「指定した物の左/右」を選ぶ場合だけ指定します。",
     )
     note = forms.CharField(label="メモ", required=False, widget=forms.Textarea(attrs={"rows": 3}))
 
@@ -100,22 +111,43 @@ class MoveUnitForm(forms.Form):
             fixture__is_active=True,
             fixture__room__is_active=True,
         ).select_related("fixture", "fixture__room")
-        self.fields["support_unit"].queryset = PhysicalUnit.objects.filter(is_active=True).exclude(pk=unit.pk)
+        available_units = PhysicalUnit.objects.filter(is_active=True).exclude(pk=unit.pk)
+        self.fields["support_unit"].queryset = available_units
+        self.fields["reference_unit"].queryset = available_units
 
     def clean(self):
         cleaned = super().clean()
         target_type = cleaned.get("target_type")
         zone = cleaned.get("zone")
         support_unit = cleaned.get("support_unit")
+        position = cleaned.get("position")
+        reference_unit = cleaned.get("reference_unit")
 
         if target_type == self.TargetType.ZONE:
             if zone is None:
                 self.add_error("zone", "配置先を選択してください。")
             cleaned["support_unit"] = None
+            support_unit = None
         elif target_type == self.TargetType.SUPPORT:
             if support_unit is None:
                 self.add_error("support_unit", "下になる物を選択してください。")
             cleaned["zone"] = None
+            zone = None
+
+        if position in {self.Position.BEFORE, self.Position.AFTER}:
+            if reference_unit is None:
+                self.add_error("reference_unit", "左右の基準にする物を選択してください。")
+            elif zone is not None and not Placement.objects.filter(
+                unit=reference_unit, zone=zone
+            ).exists():
+                self.add_error("reference_unit", "基準にする物は選択した配置先にありません。")
+            elif support_unit is not None and not Placement.objects.filter(
+                unit=reference_unit, support_unit=support_unit
+            ).exists():
+                self.add_error("reference_unit", "基準にする物は同じ物の上にありません。")
+        else:
+            cleaned["reference_unit"] = None
+
         return cleaned
 
 
