@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django import forms
+from django.db.models import Q
 
 from .models import Fixture, PlacementZone, Room
 
@@ -92,7 +93,10 @@ class FixtureForm(StableCodeModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["room"].queryset = Room.objects.filter(is_active=True).order_by("code")
+        query = Q(is_active=True)
+        if self.instance and not self.instance._state.adding and self.instance.room_id:
+            query |= Q(pk=self.instance.room_id)
+        self.fields["room"].queryset = Room.objects.filter(query).order_by("code")
 
 
 class PlacementZoneForm(StableCodeModelForm):
@@ -138,8 +142,9 @@ class PlacementZoneForm(StableCodeModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        query = Q(is_active=True, room__is_active=True)
+        if self.instance and not self.instance._state.adding and self.instance.fixture_id:
+            query |= Q(pk=self.instance.fixture_id)
         self.fields["fixture"].queryset = (
-            Fixture.objects.filter(is_active=True, room__is_active=True)
-            .select_related("room")
-            .order_by("room__code", "code")
+            Fixture.objects.filter(query).select_related("room").order_by("room__code", "code")
         )
