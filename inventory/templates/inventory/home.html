@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Lab Inventory{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Laboratory source of truth</p>
+  <h1>Lab Inventory</h1>
+  <p>研究室の物品、在庫、通常保管位置を一元管理します。</p>
+</section>
+
+<section class="panel">
+  <h2>Implementation foundation</h2>
+  <p>検索、物品、配置、在庫、3Dビューはこの基盤上に追加されます。</p>
+  {% if user.is_staff %}
+    <p><a href="{% url 'admin:index' %}">管理画面を開く</a></p>
+  {% endif %}
+</section>
+{% endblock %}
