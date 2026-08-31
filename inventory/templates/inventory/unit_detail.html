@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ unit.code }} | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › 箱・機器・工具</nav>
+<section class="hero compact">
+  <p class="eyebrow">{{ unit.code }}</p>
+  <h1>{{ unit.name }}</h1>
+  <p>{{ unit.get_kind_display }}{% if unit.catalog_item %} / <a href="{% url 'inventory:item-detail' unit.catalog_item.code %}">{{ unit.catalog_item.name }}</a>{% endif %}</p>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <h2>通常保管位置</h2>
+    {% if perms.inventory.change_placement %}<a class="button-link" href="{% url 'inventory:unit-move' unit.code %}">位置を変更</a>{% endif %}
+  </div>
+  {% if placement %}
+    {% if placement.zone %}
+      <p><a href="{% url 'inventory:zone-detail' placement.zone.code %}">{{ placement.zone.code }} — {{ placement.zone.name }}</a></p>
+    {% else %}
+      <p><a href="{% url 'inventory:unit-detail' placement.support_unit.code %}">{{ placement.support_unit.code }} — {{ placement.support_unit.name }}</a> の上</p>
+      {% if effective_zone %}<p class="help">実効保管場所: <a href="{% url 'inventory:zone-detail' effective_zone.code %}">{{ effective_zone.code }} — {{ effective_zone.name }}</a></p>{% endif %}
+    {% endif %}
+  {% else %}
+    <p class="warning">通常保管位置が未登録です。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <h2>内容物・在庫</h2>
+    {% if perms.inventory.add_stock %}<a class="button-link" href="{% url 'inventory:stock-create' unit.code %}">品目を追加</a>{% endif %}
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>品目</th><th>現在数量</th><th>操作</th></tr></thead>
+      <tbody>
+      {% for stock in stocks %}
+        <tr>
+          <td><a href="{% url 'inventory:item-detail' stock.item.code %}">{{ stock.item.code }} — {{ stock.item.name }}</a></td>
+          <td>{{ stock.quantity }} {{ stock.item.unit }}</td>
+          <td class="actions">
+            {% if perms.inventory.change_stock %}
+              <a href="{% url 'inventory:stock-adjust' stock.id %}">増減</a>
+              <a href="{% url 'inventory:stock-count' stock.id %}">棚卸</a>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+      {% empty %}<tr><td colspan="3">在庫登録なし</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if supported %}
+<section class="panel">
+  <h2>この物の上に置かれている物</h2>
+  <div class="placement-row">
+    {% for child in supported %}
+      <a class="placement-card" href="{% url 'inventory:unit-detail' child.unit.code %}">
+        <span class="position-label">左から{{ forloop.counter }}</span>
+        <strong>{{ child.unit.code }}</strong>
+        <span>{{ child.unit.name }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>最近の位置変更</h2>
+  <ul class="audit-list">
+    {% for change in recent_changes %}
+      <li>
+        <time>{{ change.created_at|date:"Y-m-d H:i" }}</time>
+        {% if change.from_zone %}{{ change.from_zone.code }}{% elif change.from_support_unit %}{{ change.from_support_unit.code }} の上{% else %}未登録{% endif %}
+        →
+        {% if change.to_zone %}{{ change.to_zone.code }}{% else %}{{ change.to_support_unit.code }} の上{% endif %}
+      </li>
+    {% empty %}<li>履歴なし</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}
