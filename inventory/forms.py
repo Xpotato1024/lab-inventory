@@ -117,3 +117,17 @@ class MoveUnitForm(forms.Form):
                 self.add_error("support_unit", "下になる物を選択してください。")
             cleaned["zone"] = None
         return cleaned
+
+
+class StructuredImportForm(forms.Form):
+    class ImportType(models.TextChoices):
+        STOCK_ADJUST_CSV = "stock_adjust_csv", "在庫増減 CSV"
+        STOCK_COUNT_CSV = "stock_count_csv", "棚卸 CSV"
+        PLACEMENT_CSV = "placement_csv", "配置変更 CSV"
+        OPERATIONS_JSON = "operations_json", "Operation JSON"
+
+    import_type = forms.ChoiceField(label="形式", choices=ImportType.choices)
+    file = forms.FileField(
+        label="ファイル",
+        help_text="UTF-8、最大1 MB。内容は検証・previewされ、確認するまで反映されません。",
+    )
