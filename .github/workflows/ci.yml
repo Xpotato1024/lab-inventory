@@ -60,6 +60,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
+          sed -i 's#^DJANGO_SECRET_KEY=.*#DJANGO_SECRET_KEY=ci-compose-only-secret-key-not-for-production#' .env
           mkdir -p var/data var/backups
 
       - name: Start workstation stack
