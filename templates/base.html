@@ -18,6 +18,7 @@
         <a href="{% url 'inventory:export-snapshot' %}">Export</a>
         {% if perms.inventory.change_stock or perms.inventory.change_placement %}<a href="{% url 'inventory:structured-import' %}">Import</a>{% endif %}
         {% if perms.inventory.view_room %}<a href="{% url 'inventory:layout' %}">Layout</a>{% endif %}
+        {% if perms.inventory.view_catalogitem %}<a href="{% url 'inventory:master' %}">Master</a>{% endif %}
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">管理</a>{% endif %}
         <span>{{ user.get_username }}</span>
         <form method="post" action="{% url 'logout' %}">
