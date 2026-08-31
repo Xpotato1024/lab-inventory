@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}在庫変更 | {{ stock.item.name }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:unit-detail' stock.holder.code %}">{{ stock.holder.code }}</a> › 在庫変更</nav>
+<section class="hero compact"><h1>{{ stock.item.name }}</h1><p>現在 {{ stock.quantity }} {{ stock.item.unit }}</p></section>
+<section class="panel form-panel">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><button type="submit">反映</button><a href="{% url 'inventory:unit-detail' stock.holder.code %}">キャンセル</a></div>
+  </form>
+</section>
+{% endblock %}

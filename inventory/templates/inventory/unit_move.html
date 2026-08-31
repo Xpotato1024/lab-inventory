@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}位置変更 | {{ unit.code }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:unit-detail' unit.code %}">{{ unit.code }}</a> › 位置変更</nav>
+<section class="hero compact"><h1>{{ unit.name }}の通常保管位置を変更</h1></section>
+<section class="panel form-panel">
+  <p class="help">一時的な使用場所ではなく、作業後に戻す通常保管位置を登録してください。積み重ねる場合は「別の物の上」を選びます。</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><button type="submit">位置を更新</button><a href="{% url 'inventory:unit-detail' unit.code %}">キャンセル</a></div>
+  </form>
+</section>
+{% endblock %}

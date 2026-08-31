@@ -1,0 +1,42 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Lab Inventory{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'inventory/app.css' %}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'inventory:home' %}">Lab Inventory</a>
+    {% if user.is_authenticated %}
+      <nav class="header-actions" aria-label="ユーザーメニュー">
+        <a href="{% url 'inventory:room-3d' %}">3D</a>
+        <a href="{% url 'inventory:activity' %}">Activity</a>
+        <a href="{% url 'inventory:labels' %}">Labels</a>
+        <a href="{% url 'inventory:export-snapshot' %}">Export</a>
+        {% if perms.inventory.change_stock or perms.inventory.change_placement %}<a href="{% url 'inventory:structured-import' %}">Import</a>{% endif %}
+        {% if perms.inventory.view_room %}<a href="{% url 'inventory:layout' %}">Layout</a>{% endif %}
+        {% if perms.inventory.view_catalogitem %}<a href="{% url 'inventory:master' %}">Master</a>{% endif %}
+        {% if user.is_staff %}<a href="{% url 'admin:index' %}">管理</a>{% endif %}
+        <span>{{ user.get_username }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="link-button" type="submit">ログアウト</button>
+        </form>
+      </nav>
+    {% endif %}
+  </header>
+  <main class="content">
+    {% if messages %}
+      <div class="messages" aria-live="polite">
+        {% for message in messages %}<p class="message">{{ message }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

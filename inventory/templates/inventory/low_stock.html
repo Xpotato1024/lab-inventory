@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}在庫不足 | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › 在庫不足</nav>
+<section class="hero compact">
+  <p class="eyebrow">Stock status</p>
+  <h1>在庫不足</h1>
+  <p>最低在庫目安が設定され、研究室全体の合計在庫がその値を下回っている品目です。</p>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>品目</th><th>現在</th><th>最低在庫目安</th><th>不足</th><th>保管単位</th></tr></thead>
+      <tbody>
+      {% for item in items %}
+        <tr>
+          <td><a href="{% url 'inventory:item-detail' item.code %}"><strong>{{ item.code }}</strong> — {{ item.name }}</a></td>
+          <td>{{ item.total_stock }} {{ item.unit }}</td>
+          <td>{{ item.minimum_stock }} {{ item.unit }}</td>
+          <td>{{ item.shortage }} {{ item.unit }}</td>
+          <td>
+            {% for stock in item.stocks.all %}
+              <a href="{% url 'inventory:unit-detail' stock.holder.code %}">{{ stock.holder.code }}</a>{% if not forloop.last %}, {% endif %}
+            {% empty %}未登録{% endfor %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">現在、最低在庫目安を下回っている品目はありません。</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="help">最低在庫目安が未設定の品目はこの一覧の判定対象外です。</p>
+</section>
+{% endblock %}

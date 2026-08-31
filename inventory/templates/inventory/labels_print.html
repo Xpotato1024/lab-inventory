@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab Inventory labels</title>
+  <style>
+    :root {
+      --label-width: {{ size.width_mm }}mm;
+      --label-height: {{ size.height_mm }}mm;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #000; background: #fff; }
+    .controls { padding: 12px; border-bottom: 1px solid #bbb; }
+    .controls button, .controls a { margin-right: 8px; font: inherit; }
+    .warning { font-weight: 700; }
+    .sheet { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 3mm; padding: 6mm; }
+    .label {
+      width: var(--label-width);
+      height: var(--label-height);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) calc(var(--label-height) - 6mm);
+      gap: 2mm;
+      padding: 2mm;
+      overflow: hidden;
+      border: 0.25mm solid #000;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      background: #fff;
+    }
+    .label-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .label-code { font-size: 15pt; font-weight: 800; line-height: 1.05; overflow-wrap: anywhere; }
+    .label-name { margin-top: 1mm; font-size: 8.5pt; line-height: 1.15; overflow: hidden; }
+    .label-category { margin-top: auto; padding-top: 1mm; font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.04em; }
+    .label-qr { width: 100%; height: 100%; object-fit: contain; align-self: center; }
+    @page { margin: 6mm; }
+    @media print {
+      .no-print { display: none !important; }
+      .sheet { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls no-print">
+    <button type="button" onclick="window.print()">印刷</button>
+    <a href="{% url 'inventory:labels' %}">選択画面へ戻る</a>
+    <span>QR base: {{ base_url }}</span>
+    {% if non_production_host %}<p class="warning">現在のホストはlocalhostです。このまま印刷すると他端末からQRを開けません。本番ドメインで印刷してください。</p>{% endif %}
+  </div>
+
+  <main class="sheet">
+    {% for label in labels %}
+      <article class="label">
+        <div class="label-text">
+          <div class="label-code">{{ label.code }}</div>
+          <div class="label-name">{{ label.name }}</div>
+          <div class="label-category">{{ label.category }}</div>
+        </div>
+        <img class="label-qr" src="{{ label.qr_url }}" alt="{{ label.code }} QR">
+      </article>
+    {% endfor %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Activity | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › Activity</nav>
+<section class="hero compact">
+  <p class="eyebrow">Audit trail</p>
+  <h1>変更履歴</h1>
+  <p>通常GUIと一括Importで記録された在庫・配置の監査履歴です。</p>
+</section>
+
+<form class="search-form" method="get">
+  <label for="activity-q">履歴を絞り込む</label>
+  <div class="search-row">
+    <input id="activity-q" name="q" value="{{ query }}" placeholder="I-0001, C-0042, Z-0127, ユーザー名, メモ…">
+    <button type="submit">検索</button>
+  </div>
+</form>
+
+<section class="panel">
+  <h2>在庫変更</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>日時</th><th>品目</th><th>保管単位</th><th>変更</th><th>変更後</th><th>理由</th><th>操作</th><th>メモ</th></tr></thead>
+      <tbody>
+      {% for change in stock_changes %}
+        <tr>
+          <td>{{ change.created_at|date:"Y-m-d H:i:s" }}</td>
+          <td><a href="{% url 'inventory:item-detail' change.stock.item.code %}">{{ change.stock.item.code }} — {{ change.stock.item.name }}</a></td>
+          <td><a href="{% url 'inventory:unit-detail' change.stock.holder.code %}">{{ change.stock.holder.code }}</a></td>
+          <td>{{ change.delta|stringformat:"+.3f" }} {{ change.stock.item.unit }}</td>
+          <td>{{ change.resulting_quantity }} {{ change.stock.item.unit }}</td>
+          <td>{{ change.get_reason_display }}</td>
+          <td>{% if change.actor %}{{ change.actor.get_username }}{% else %}system/unknown{% endif %}</td>
+          <td>{{ change.note|default:"—" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="8">該当する在庫履歴はありません。</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>位置変更</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>日時</th><th>物</th><th>移動前</th><th>移動後</th><th>操作</th><th>メモ</th></tr></thead>
+      <tbody>
+      {% for change in placement_changes %}
+        <tr>
+          <td>{{ change.created_at|date:"Y-m-d H:i:s" }}</td>
+          <td><a href="{% url 'inventory:unit-detail' change.unit.code %}">{{ change.unit.code }} — {{ change.unit.name }}</a></td>
+          <td>
+            {% if change.from_zone %}<a href="{% url 'inventory:zone-detail' change.from_zone.code %}">{{ change.from_zone.code }}</a>
+            {% elif change.from_support_unit %}<a href="{% url 'inventory:unit-detail' change.from_support_unit.code %}">{{ change.from_support_unit.code }}</a> の上
+            {% else %}未登録{% endif %}
+          </td>
+          <td>
+            {% if change.to_zone %}<a href="{% url 'inventory:zone-detail' change.to_zone.code %}">{{ change.to_zone.code }}</a>
+            {% elif change.to_support_unit %}<a href="{% url 'inventory:unit-detail' change.to_support_unit.code %}">{{ change.to_support_unit.code }}</a> の上
+            {% else %}未登録{% endif %}
+          </td>
+          <td>{% if change.actor %}{{ change.actor.get_username }}{% else %}system/unknown{% endif %}</td>
+          <td>{{ change.note|default:"—" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="6">該当する位置履歴はありません。</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<p class="help">画面は直近100件ずつを表示します。完全な履歴はSoT内に保持されます。</p>
+{% endblock %}

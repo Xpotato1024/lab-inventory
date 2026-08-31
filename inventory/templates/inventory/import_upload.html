@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}一括Import | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › 一括Import</nav>
+<section class="hero compact">
+  <h1>一括Import</h1>
+  <p>ファイルはまず検証され、差分previewを確認するまでSoTには反映されません。</p>
+</section>
+
+<section class="panel form-panel">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><button type="submit">検証してpreview</button><a href="{% url 'inventory:home' %}">キャンセル</a></div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>V1対応形式</h2>
+  <dl class="detail-list">
+    <dt>在庫増減CSV</dt><dd><code>item_code,holder_code,operation,quantity,reason,note</code></dd>
+    <dt>棚卸CSV</dt><dd><code>item_code,holder_code,counted_quantity,note</code></dd>
+    <dt>配置CSV</dt><dd><code>unit_code,zone_code,support_unit_code,order_key,note</code></dd>
+    <dt>Operation JSON</dt><dd><code>lab-inventory.operations.v1</code> schema</dd>
+  </dl>
+  <p class="help">CSV/JSONはUTF-8、最大1 MB・1000操作です。配置CSVではzone_codeとsupport_unit_codeのどちらか一方だけを指定します。</p>
+</section>
+{% endblock %}

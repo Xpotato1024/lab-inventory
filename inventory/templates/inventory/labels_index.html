@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Labels | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › Labels</nav>
+<section class="hero compact">
+  <p class="eyebrow">Physical identity</p>
+  <h1>QRラベル</h1>
+  <p>IDと安定URLを印刷します。現在位置や箱の中身はラベルに固定しません。</p>
+</section>
+
+<form class="search-form" method="get">
+  <label for="label-search">対象を絞り込む</label>
+  <div class="search-row">
+    <input id="label-search" name="q" value="{{ query }}" placeholder="C-0042, Z-0127, 棚名…">
+    <button type="submit">検索</button>
+  </div>
+</form>
+
+<form method="post" action="{% url 'inventory:labels-print' %}" class="label-selection-form">
+  {% csrf_token %}
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>印刷設定</h2>
+        <p class="help">ブラウザの印刷倍率は100%を基準にしてください。実際のラベル用紙に合わせて試し刷りしてください。</p>
+      </div>
+      <button type="submit">印刷シートを作成</button>
+    </div>
+    <label for="label-size">ラベル寸法</label>
+    <select id="label-size" name="size">
+      {% for key, option in label_sizes.items %}<option value="{{ key }}"{% if key == "medium" %} selected{% endif %}>{{ option.label }}</option>{% endfor %}
+    </select>
+  </section>
+
+  <section class="panel">
+    <div class="section-heading">
+      <h2>Placement Zone</h2>
+      <button type="button" class="link-button" data-check-group="zone">表示中をすべて選択/解除</button>
+    </div>
+    <div class="label-choice-grid">
+      {% for zone in zones %}
+      <label class="label-choice">
+        <input type="checkbox" name="zone" value="{{ zone.code }}" data-label-group="zone">
+        <span><strong>{{ zone.code }}</strong><br>{{ zone.name }}<br><span class="help">{{ zone.fixture.room.name }} / {{ zone.fixture.name }}</span></span>
+      </label>
+      {% empty %}<p>該当するZoneはありません。</p>{% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-heading">
+      <h2>箱・工具・機器</h2>
+      <button type="button" class="link-button" data-check-group="unit">表示中をすべて選択/解除</button>
+    </div>
+    <div class="label-choice-grid">
+      {% for unit in units %}
+      <label class="label-choice">
+        <input type="checkbox" name="unit" value="{{ unit.code }}" data-label-group="unit">
+        <span><strong>{{ unit.code }}</strong><br>{{ unit.name }}<br><span class="help">{{ unit.get_kind_display }}</span></span>
+      </label>
+      {% empty %}<p>該当するPhysical Unitはありません。</p>{% endfor %}
+    </div>
+  </section>
+
+  <div class="form-actions"><button type="submit">印刷シートを作成</button></div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+for (const button of document.querySelectorAll('[data-check-group]')) {
+  button.addEventListener('click', () => {
+    const group = button.dataset.checkGroup;
+    const boxes = [...document.querySelectorAll(`[data-label-group="${group}"]`)];
+    const shouldCheck = boxes.some((box) => !box.checked);
+    for (const box of boxes) box.checked = shouldCheck;
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Import preview | Lab Inventory{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:structured-import' %}">一括Import</a> › preview</nav>
+<section class="hero compact">
+  <h1>反映内容を確認</h1>
+  <p>この画面を表示した時点では、まだデータは変更されていません。</p>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>種別</th><th>対象</th><th>現在</th><th>反映後</th><th>内容</th></tr></thead>
+      <tbody>
+        {% for row in preview %}
+        <tr>
+          <td>{{ row.index }}</td>
+          <td>{{ row.kind }}</td>
+          <td>{{ row.target }}</td>
+          <td>{{ row.before }}</td>
+          <td>{{ row.after }}</td>
+          <td>{{ row.detail }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="help">確認時に現在の在庫・配置を再検査します。preview後に対象データが変更されていた場合、このbatchは拒否されます。</p>
+  <form method="post" action="{% url 'inventory:structured-import-confirm' %}">
+    {% csrf_token %}
+    <input type="hidden" name="batch_id" value="{{ batch_id }}">
+    <div class="form-actions">
+      <button type="submit">この内容を反映</button>
+      <a href="{% url 'inventory:structured-import' %}">破棄して戻る</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
