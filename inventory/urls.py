@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import bulk_views, views
 
 app_name = "inventory"
 
@@ -14,7 +14,7 @@ urlpatterns = [
     path("z/<str:code>/", views.zone_detail, name="zone-detail"),
     path("stock/<uuid:stock_id>/adjust/", views.stock_adjust, name="stock-adjust"),
     path("stock/<uuid:stock_id>/count/", views.stock_count, name="stock-count"),
-    path("import/", views.structured_import, name="structured-import"),
-    path("import/confirm/", views.structured_import_confirm, name="structured-import-confirm"),
-    path("export/snapshot.json", views.export_snapshot, name="export-snapshot"),
+    path("import/", bulk_views.structured_import, name="structured-import"),
+    path("import/confirm/", bulk_views.structured_import_confirm, name="structured-import-confirm"),
+    path("export/snapshot.json", bulk_views.export_snapshot, name="export-snapshot"),
 ]
