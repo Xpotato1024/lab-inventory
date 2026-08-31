@@ -127,7 +127,8 @@ class OperatorWorkflowTests(TestCase):
                 "target_type": "ZONE",
                 "zone": str(self.zone2.pk),
                 "support_unit": "",
-                "order_key": "20",
+                "position": "RIGHTMOST",
+                "reference_unit": "",
                 "note": "cleanup",
             },
         )
