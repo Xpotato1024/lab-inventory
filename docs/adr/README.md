@@ -24,3 +24,4 @@ Accepted ADRs should not be silently rewritten to change their decision. Add a n
 - [ADR-0008: Use laboratory workstation hosting](0008-deployment-runtime.md) — Accepted
 - [ADR-0009: Use SQLite as the V1 operational database](0009-database-engine.md) — Accepted
 - [ADR-0010: Use a conventional Django server-rendered application stack](0010-application-stack.md) — Accepted
+- [ADR-0011: Use pinned Three.js ES modules without a JavaScript build step](0011-threejs-without-js-build-step.md) — Accepted
