@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}棚卸 | {{ stock.item.name }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:unit-detail' stock.holder.code %}">{{ stock.holder.code }}</a> › 棚卸</nav>
+<section class="hero compact"><h1>{{ stock.item.name }}を棚卸</h1><p>DB上の現在値 {{ stock.quantity }} {{ stock.item.unit }}</p></section>
+<section class="panel form-panel">
+  <p class="help">実際に数えた絶対数量を入力します。差分は棚卸補正として履歴に残ります。</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><button type="submit">棚卸を記録</button><a href="{% url 'inventory:unit-detail' stock.holder.code %}">キャンセル</a></div>
+  </form>
+</section>
+{% endblock %}
