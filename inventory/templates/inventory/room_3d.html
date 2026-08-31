@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}3D locator | Lab Inventory{% endblock %}
+
+{% block head_extra %}
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'inventory:home' %}">検索</a> › 3D locator</nav>
+<section class="hero compact">
+  <p class="eyebrow">Derived spatial view</p>
+  <h1>3D locator</h1>
+  <p>棚・机・壁面・箱・機器をSoTの寸法と配置関係から簡易表示します。3D表示自体はSoTではありません。</p>
+</section>
+
+<section class="panel scene-toolbar">
+  <form method="get" class="inline-form">
+    <label for="room-select">部屋</label>
+    <select id="room-select" name="room" onchange="this.form.submit()">
+      {% for candidate in rooms %}
+        <option value="{{ candidate.code }}"{% if room and candidate.id == room.id %} selected{% endif %}>{{ candidate.code }} — {{ candidate.name }}</option>
+      {% empty %}
+        <option>部屋が未登録です</option>
+      {% endfor %}
+    </select>
+    <noscript><button type="submit">表示</button></noscript>
+  </form>
+  {% if room %}<p class="help">表示中: {{ room.code }} — {{ room.name }}</p>{% endif %}
+</section>
+
+{% for warning in page_warnings %}<p class="warning">{{ warning }}</p>{% endfor %}
+{% if scene_data %}
+  {% for warning in scene_data.warnings %}<p class="warning">{{ warning }}</p>{% endfor %}
+
+  <section class="scene-layout" aria-label="研究室3D表示">
+    <div id="scene-container" class="scene-viewer">
+      <div id="scene-loading" class="scene-loading">3D表示を読み込んでいます…</div>
+    </div>
+    <aside class="scene-sidebar panel">
+      <h2>表示操作</h2>
+      <p class="help">ドラッグ: 回転 / 右ドラッグ: 平行移動 / ホイール: 拡大縮小</p>
+      <button id="scene-reset" type="button">部屋全体へ戻る</button>
+
+      <h2>選択</h2>
+      <div id="scene-selection" class="scene-selection" aria-live="polite">
+        <p>箱・棚などをクリックすると情報を表示します。</p>
+      </div>
+
+      <h2>凡例</h2>
+      <ul class="scene-legend">
+        <li><span class="legend-swatch fixture"></span>設備</li>
+        <li><span class="legend-swatch zone"></span>Placement Zone</li>
+        <li><span class="legend-swatch unit"></span>箱・工具・機器</li>
+        <li><span class="legend-swatch highlight"></span>検索対象</li>
+      </ul>
+    </aside>
+  </section>
+
+  {{ scene_data|json_script:"scene-data" }}
+{% else %}
+  <section class="panel">
+    <h2>表示対象がありません</h2>
+    <p>まず管理画面から部屋と設備を登録してください。</p>
+  </section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if scene_data %}<script type="module" src="{% static 'inventory/scene.js' %}"></script>{% endif %}
+{% endblock %}
