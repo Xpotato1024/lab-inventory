@@ -8,6 +8,7 @@
   <p class="eyebrow">{{ zone.code }}</p>
   <h1>{{ zone.name }}</h1>
   <p>{{ zone.fixture.room.name }} › {{ zone.fixture.name }}{% if zone.level_order %} › 下から{{ zone.level_order }}段目{% endif %}</p>
+  <p><a class="button-link" href="{% url 'inventory:room-3d' %}?zone={{ zone.code|urlencode }}">3Dで表示</a></p>
 </section>
 
 <section class="panel">
