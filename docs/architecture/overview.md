@@ -4,7 +4,7 @@
 
 The system is an operational source of truth for laboratory inventory and normal storage locations, with a derived procedural 3D view that helps people find physical objects.
 
-The architecture is intentionally divided into conceptual layers so deployment technology can change without redefining laboratory semantics.
+The architecture is intentionally divided into conceptual layers so implementation details can evolve without redefining laboratory semantics.
 
 ## Conceptual layers
 
@@ -30,6 +30,8 @@ Normal users interact with the application through the web UI. Administrative bu
 
 Source code, shell access, and direct database changes are maintenance-only activities.
 
+Direct SQL must not be part of routine operation, deployment, backup, restore, or ordinary upgrades.
+
 ## Domain boundary
 
 The system separates:
@@ -51,4 +53,16 @@ It is not a separately edited authoritative model.
 
 ## Deployment boundary
 
-The operational deployment model is not yet accepted. See ADR-0008. The domain and UI contracts should not depend on whether the application ultimately runs on a laboratory workstation or a managed full-stack platform.
+The authoritative operational application runs on an always-on laboratory workstation as defined by ADR-0008.
+
+```text
+Browser
+  -> HTTPS / laboratory domain
+  -> controlled ingress
+  -> workstation-hosted application
+  -> operational datastore
+```
+
+A secure outbound tunnel is preferred when it reduces network/TLS administration, with a conventional reverse proxy as a fallback.
+
+The database engine is intentionally a separate decision; see ADR-0009.
