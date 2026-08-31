@@ -15,7 +15,8 @@ This directory is the documentation entry point for `lab-inventory`.
 `specifications/` contains normative behavior and data semantics.
 
 - `specifications/placement-model.md` — placement zones, ordering, stacking, and recursive placement rules.
-- `specifications/identifiers.md` — internal identifiers, human-facing codes, and label/QR rules.
+- `specifications/identifiers.md` — internal identifiers and human-facing code rules.
+- `specifications/labels-and-qr.md` — durable physical-label and QR payload semantics.
 - `specifications/import-export.md` — validated structured import/export behavior.
 - `specifications/3d-view.md` — procedural 3D coordinate, fallback, stacking, and failure-boundary semantics.
 
@@ -35,4 +36,4 @@ The current V1 foundation is workstation-hosted Django 5.2 LTS with SQLite, unde
 
 ## Source-of-truth rule
 
-Operational state belongs to the application's operational datastore. 3D geometry, generated views, CSV/XLSX/YAML/JSON imports, exports, and documentation do not become competing operational sources of truth.
+Operational state belongs to the application's operational datastore. 3D geometry, generated views, CSV/XLSX/YAML/JSON imports, exports, physical labels, and documentation do not become competing operational sources of truth.
