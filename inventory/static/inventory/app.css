@@ -408,3 +408,39 @@ td {
     height: 52vh;
   }
 }
+
+.inactive {
+  opacity: 0.62;
+}
+
+.layout-fixture {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-inline-start: 0.25rem solid currentColor;
+}
+
+.layout-fixture .section-heading strong,
+.layout-fixture .section-heading span {
+  display: block;
+}
+
+.layout-zone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+
+.layout-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 0.45rem;
+}
+
+.layout-zone .actions {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+}
