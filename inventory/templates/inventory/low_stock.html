@@ -20,7 +20,7 @@
           <td><a href="{% url 'inventory:item-detail' item.code %}"><strong>{{ item.code }}</strong> — {{ item.name }}</a></td>
           <td>{{ item.total_stock }} {{ item.unit }}</td>
           <td>{{ item.minimum_stock }} {{ item.unit }}</td>
-          <td>{{ item.minimum_stock|floatformat:3 }} − {{ item.total_stock|floatformat:3 }} {{ item.unit }}</td>
+          <td>{{ item.shortage }} {{ item.unit }}</td>
           <td>
             {% for stock in item.stocks.all %}
               <a href="{% url 'inventory:unit-detail' stock.holder.code %}">{{ stock.holder.code }}</a>{% if not forloop.last %}, {% endif %}
