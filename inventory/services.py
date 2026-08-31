@@ -8,6 +8,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from .models import (
+    CatalogItem,
     PhysicalUnit,
     Placement,
     PlacementChange,
@@ -23,6 +24,36 @@ class StockUnderflowError(ValidationError):
 
 def _decimal(value: Decimal | int | str) -> Decimal:
     return value if isinstance(value, Decimal) else Decimal(str(value))
+
+
+@transaction.atomic
+def create_stock(
+    *,
+    item: CatalogItem,
+    holder: PhysicalUnit,
+    initial_quantity: Decimal | int | str = 0,
+    reason: str = StockChange.Reason.COUNT,
+    actor=None,
+    note: str = "",
+) -> tuple[Stock, StockChange]:
+    """Create a quantity-tracked stock row and its initial audit record atomically."""
+
+    quantity = _decimal(initial_quantity)
+    if item.tracking_mode != CatalogItem.TrackingMode.QUANTITY:
+        raise ValidationError({"item": "Only quantity-tracked items can create stock rows."})
+    if quantity < 0:
+        raise ValidationError({"initial_quantity": "Initial quantity cannot be negative."})
+
+    stock = Stock.objects.create(item=item, holder=holder, quantity=quantity)
+    change = StockChange.objects.create(
+        stock=stock,
+        delta=quantity,
+        resulting_quantity=quantity,
+        reason=reason,
+        note=note,
+        actor=actor,
+    )
+    return stock, change
 
 
 @transaction.atomic
