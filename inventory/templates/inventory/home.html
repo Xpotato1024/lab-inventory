@@ -1,19 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}Lab Inventory{% endblock %}
+{% block title %}検索 | Lab Inventory{% endblock %}
 
 {% block content %}
 <section class="hero">
   <p class="eyebrow">Laboratory source of truth</p>
-  <h1>Lab Inventory</h1>
-  <p>研究室の物品、在庫、通常保管位置を一元管理します。</p>
+  <h1>研究室の物品を探す</h1>
+  <p>品名、型番、箱ID、棚IDなどから通常保管位置と在庫を検索します。</p>
 </section>
 
-<section class="panel">
-  <h2>Implementation foundation</h2>
-  <p>検索、物品、配置、在庫、3Dビューはこの基盤上に追加されます。</p>
-  {% if user.is_staff %}
-    <p><a href="{% url 'admin:index' %}">管理画面を開く</a></p>
-  {% endif %}
+<form class="search-form" method="get" role="search">
+  <label for="search-q">検索</label>
+  <div class="search-row">
+    <input id="search-q" name="q" value="{{ query }}" type="search" autofocus placeholder="例: M3, C-0042, はんだごて">
+    <button type="submit">検索</button>
+  </div>
+</form>
+
+{% if query %}
+<section class="result-section">
+  <h2>品目</h2>
+  {% for item in items %}
+    <a class="result-card" href="{% url 'inventory:item-detail' item.code %}">
+      <strong>{{ item.code }}</strong> {{ item.name }}
+      {% if item.part_number %}<span>{{ item.part_number }}</span>{% endif %}
+    </a>
+  {% empty %}<p>該当なし</p>{% endfor %}
 </section>
+
+<section class="result-section">
+  <h2>箱・機器・工具</h2>
+  {% for unit in units %}
+    <a class="result-card" href="{% url 'inventory:unit-detail' unit.code %}">
+      <strong>{{ unit.code }}</strong> {{ unit.name }}
+      <span>{{ unit.get_kind_display }}</span>
+    </a>
+  {% empty %}<p>該当なし</p>{% endfor %}
+</section>
+
+<section class="result-section">
+  <h2>保管場所</h2>
+  {% for zone in zones %}
+    <a class="result-card" href="{% url 'inventory:zone-detail' zone.code %}">
+      <strong>{{ zone.code }}</strong> {{ zone.name }}
+      <span>{{ zone.fixture.room.name }} › {{ zone.fixture.name }}</span>
+    </a>
+  {% empty %}<p>該当なし</p>{% endfor %}
+</section>
+{% endif %}
 {% endblock %}
