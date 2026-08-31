@@ -8,6 +8,7 @@
   <p class="eyebrow">{{ unit.code }}</p>
   <h1>{{ unit.name }}</h1>
   <p>{{ unit.get_kind_display }}{% if unit.catalog_item %} / <a href="{% url 'inventory:item-detail' unit.catalog_item.code %}">{{ unit.catalog_item.name }}</a>{% endif %}</p>
+  {% if perms.inventory.change_physicalunit %}<p><a href="{% url 'inventory:unit-edit' unit.code %}">マスタ情報を編集</a></p>{% endif %}
 </section>
 
 <section class="panel">
