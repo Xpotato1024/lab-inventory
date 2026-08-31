@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import bulk_views, label_views, layout_views, scene_views, views
+from . import bulk_views, label_views, layout_views, master_views, scene_views, views
 
 app_name = "inventory"
 
@@ -19,6 +19,11 @@ urlpatterns = [
     path("layout/fixtures/<str:code>/edit/", layout_views.fixture_edit, name="fixture-edit"),
     path("layout/zones/new/", layout_views.zone_create, name="zone-create"),
     path("layout/zones/<str:code>/edit/", layout_views.zone_edit, name="zone-edit"),
+    path("master/", master_views.master_index, name="master"),
+    path("master/items/new/", master_views.item_create, name="item-create"),
+    path("master/items/<str:code>/edit/", master_views.item_edit, name="item-edit"),
+    path("master/units/new/", master_views.unit_create, name="unit-create"),
+    path("master/units/<str:code>/edit/", master_views.unit_edit, name="unit-edit"),
     path("i/<str:code>/", views.item_detail, name="item-detail"),
     path("u/<str:code>/", views.unit_detail, name="unit-detail"),
     path("u/<str:code>/move/", views.unit_move, name="unit-move"),
