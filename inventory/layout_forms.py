@@ -10,7 +10,9 @@ class StableCodeModelForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk and "code" in self.fields:
+        # UUID primary keys are assigned before the first save, so `pk` alone
+        # cannot distinguish a new instance from an existing persisted entity.
+        if self.instance and not self.instance._state.adding and "code" in self.fields:
             self.fields["code"].disabled = True
             self.fields["code"].help_text = "作成後のIDは通常変更しません。物理ラベルとの対応を維持します。"
 
