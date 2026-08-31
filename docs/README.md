@@ -6,7 +6,9 @@ This directory is the documentation entry point for `lab-inventory`.
 
 `architecture/` explains the conceptual structure of the system and the boundaries between major domain concepts.
 
+- `architecture/overview.md` — system boundaries and source-of-truth flow.
 - `architecture/domain-model.md` — domain entities and relationships.
+- `architecture/deployment.md` — selected workstation-hosted deployment boundary and maintainer responsibilities.
 
 ## Specifications
 
@@ -14,6 +16,7 @@ This directory is the documentation entry point for `lab-inventory`.
 
 - `specifications/placement-model.md` — placement zones, ordering, stacking, and recursive placement rules.
 - `specifications/identifiers.md` — internal identifiers, human-facing codes, and label/QR rules.
+- `specifications/import-export.md` — validated structured import/export behavior.
 
 ## Operations
 
@@ -21,11 +24,13 @@ This directory is the documentation entry point for `lab-inventory`.
 
 Routine operation must be GUI-first. Structured files are secondary interfaces for bulk operations, migration, and administration.
 
+Routine deployment, backup, restore, and ordinary upgrades must not require direct SQL.
+
 ## Architecture Decision Records
 
 `adr/` records why significant architectural choices were made. See `adr/README.md` for status conventions and the current decision index.
 
-Deployment/runtime technology is deliberately not frozen yet. ADR-0008 compares the candidate deployment models, including GitHub Pages, self-hosting through a secure tunnel, and a managed serverless deployment.
+The operational application is hosted on the laboratory always-on workstation under ADR-0008. Database engine selection remains open under ADR-0009.
 
 ## Source-of-truth rule
 
