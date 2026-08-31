@@ -33,7 +33,7 @@ if [ "${DJANGO_DEBUG:-1}" != "0" ]; then
 fi
 
 for variable in LAB_INVENTORY_HOST_DATA_DIR LAB_INVENTORY_HOST_BACKUP_DIR; do
-  eval "directory=\${$variable:-}"
+  directory=$(printenv "$variable" 2>/dev/null || true)
   if [ -z "$directory" ]; then
     echo "ERROR: $variable is empty." >&2
     exit 1
